@@ -6,7 +6,7 @@ def get_config():
         "num_epochs": 20,
         "lr": 5e-5,
         "seq_len": 350,
-        "d_model": 512,
+        "d_model": 768,
         "lang_src": "en",
         "lang_tgt": "it",
         "model_folder": "weights",
