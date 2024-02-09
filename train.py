@@ -5,6 +5,7 @@ from config import get_config, get_weights_file_path
 import torchtext.datasets as datasets
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
 from torch.optim.lr_scheduler import LambdaLR
 
@@ -45,15 +46,24 @@ def greedy_decode(model, source, source_mask, tokenizer_tgt, max_len, device):
         out = model.decode(encoder_output, source_mask, decoder_input, decoder_mask)
         # print(f'out: {out.shape}')
 
-        # get next token
-        prob = model.project(out[:, -1])
-        _, next_word = torch.max(prob, dim=1)
-        # print(f'prob: {prob.shape}')
-        decoder_input = torch.cat(
-            [decoder_input, torch.empty(1, 1).long().fill_(next_word.item()).to(device)], dim=1
-        )
+        # Get next token probabilities with temperature applied
+        logits = model.project(out[:, -1]) / 7
+        probabilities = F.softmax(logits, dim=-1)
 
-        if next_word == eos_idx:
+        # Greedily select the next word
+        next_word = torch.argmax(probabilities, dim=1)
+        
+        # Append next word
+        decoder_input = torch.cat([decoder_input, next_word.unsqueeze(0)], dim=1)
+        # # get next token
+        # prob = model.project(out[:, -1])
+        # _, next_word = torch.max(prob, dim=1)
+        # # print(f'prob: {prob.shape}')
+        # decoder_input = torch.cat(
+        #     [decoder_input, torch.empty(1, 1).long().fill_(next_word.item()).to(device)], dim=1
+        # )
+
+        if next_word.item() == eos_idx:
             break
 
     return decoder_input.squeeze(0)
