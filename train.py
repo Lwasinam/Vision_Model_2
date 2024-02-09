@@ -50,7 +50,7 @@ def greedy_decode(model, source, source_mask, tokenizer_tgt, max_len, device):
         _, next_word = torch.max(prob, dim=1)
         # print(f'prob: {prob.shape}')
         decoder_input = torch.cat(
-            [decoder_input, torch.empty(1, 1).type_as(source).fill_(next_word.item()).to(device)], dim=1
+            [decoder_input, torch.empty(1, 1).long().fill_(next_word.item()).to(device)], dim=1
         )
 
         if next_word == eos_idx:
