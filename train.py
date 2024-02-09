@@ -100,7 +100,7 @@ def run_validation(model, validation_ds,tokenizer_tgt, max_len, device, print_ms
 
             # source_text = batch["src_text"][0]
             target_text = batch["tgt_text"][0]
-            print(model_out)
+           
             model_out_text = tokenizer_tgt.decode(model_out.detach().cpu().numpy())
 
             # source_texts.append(source_text)
@@ -210,7 +210,7 @@ def train_model(config):
     model = get_model(config, tokenizer_tgt.get_vocab_size()).to(device)
    
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'], eps=1e-9)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'], betas=(0.9, 0.98),eps=1e-9)
 
     # If the user specified a model to preload before training, load it
     initial_epoch = 0
@@ -230,7 +230,7 @@ def train_model(config):
         model.train()
         batch_iterator = tqdm(train_dataloader, desc=f"Processing Epoch {epoch:02d}")
         for batch in batch_iterator:
-            run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
+            # run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
             encoder_input = batch['encoder_input'].to(device) # (b, seq_len)
             decoder_input = batch['decoder_input'].to(device) # (B, seq_len)
             encoder_mask = batch['encoder_mask'].to(device) # (B, 1, 1, seq_len)
