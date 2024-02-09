@@ -47,7 +47,7 @@ def greedy_decode(model, source, source_mask, tokenizer_tgt, max_len, device):
         # print(f'out: {out.shape}')
 
         # Get next token probabilities with temperature applied
-        logits = model.project(out[:, -1]) / 7
+        logits = model.project(out[:, -1]) 
         probabilities = F.softmax(logits, dim=-1)
 
         # Greedily select the next word
