@@ -90,6 +90,7 @@ def run_validation(model, validation_ds,tokenizer_tgt, max_len, device, print_ms
 
             # source_text = batch["src_text"][0]
             target_text = batch["tgt_text"][0]
+            print(model_out)
             model_out_text = tokenizer_tgt.decode(model_out.detach().cpu().numpy())
 
             # source_texts.append(source_text)
