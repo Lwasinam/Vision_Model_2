@@ -127,9 +127,9 @@ def run_validation(model, validation_ds,tokenizer_tgt, max_len, device, print_ms
     #     writer.add_scalar('validation BLEU', bleu, global_step)
     #     writer.flush()
 
-def get_all_sentences(ds, lang):
+def get_all_sentences(ds):
     for item in ds:
-        yield item['translation'][lang]
+        yield item['en_text']
 def batch_iterator(data):
     for i in range(0, len(data)):
         yield data[i]['en_text'] 
@@ -146,7 +146,7 @@ def get_or_build_tokenizer(config, ds):
         tokenizer = Tokenizer(WordLevel(unk_token="[UNK]"))
         tokenizer.pre_tokenizer = Whitespace()
         trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[SOS]", "[EOS]"], min_frequency=2)
-        tokenizer.train_from_iterator(tqdm_batch_iterator(ds), trainer=trainer)
+        tokenizer.train_from_iterator(get_all_sentences(ds), trainer=trainer)
         tokenizer.save(str(tokenizer_path))
     else:
         tokenizer = Tokenizer.from_file(str(tokenizer_path))
