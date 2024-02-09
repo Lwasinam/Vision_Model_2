@@ -30,7 +30,7 @@ def greedy_decode(model, source, source_mask, tokenizer_tgt, max_len, device):
 
     # Precompute the encoder output and reuse it for every step
     encoder_output = model.encode(source, None)
-    print(f'encoder shape {encoder_output.shape}')
+   
     # Initialize the decoder input with the sos token
     decoder_input = torch.empty(1, 1).fill_(sos_idx).long().to(device)
     while True:
