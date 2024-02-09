@@ -291,6 +291,7 @@ class Transformer(nn.Module):
     
     def decode(self, encoder_output: torch.Tensor, src_mask: torch.Tensor, tgt: torch.Tensor, tgt_mask: torch.Tensor):
         # (batch, seq_len, d_model)
+        tgt = tgt.long()
         tgt = self.tgt_embed(tgt)
         tgt = self.tgt_pos(tgt)
         return self.decoder(tgt, encoder_output, src_mask, tgt_mask)
