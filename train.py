@@ -193,7 +193,7 @@ def get_model(config, vocab_tgt_len):
 def train_model(config):
 
     wandb.login(key = 'c20a1022142595d7d1324fdc53b3ccb34c0ded22')
-    wandb.init(project="Vision", name=config['project_name'])
+    wandb.init(project="Vision", name=config['project_name'], resume=True)
 
     # Initialize WandB configuration
     wandb.config.epochs = config['num_epochs']
@@ -280,7 +280,7 @@ def train_model(config):
                 # Run the tensors through the encoder, decoder and the projection layer
             
                 encoder_output = model.encode(encoder_input, None) # (B, seq_len, d_model)
-                decoder_output = model.decode( decoder_input,None,  decoder_mask, encoder_output) # (B, seq_len, d_model)
+                decoder_output = model.decode(encoder_output, None, decoder_input, decoder_mask)# (B, seq_len, d_model)
                 proj_output = model.project(decoder_output)
             
                 # (B, seq_len, vocab_size)
