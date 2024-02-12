@@ -165,7 +165,7 @@ def get_or_build_tokenizer(config, ds):
 def get_ds(config):
     # It only has the train split, so we divide it overselves
     # ds_raw = load_dataset("HausaNLP/HausaVG", split='train+validation+test+challenge_test')
-    ds_raw = load_dataset("MMInstruction/M3IT", ds_name, split='train+validation+test')
+    ds_raw = load_dataset("MMInstruction/M3IT", 'coco', split='train+validation+test')
     # ds_raw = load_dataset('opus_books', f"{config['lang_src']}-{config['lang_tgt']}", split='train')
 
     # Build tokenizers
