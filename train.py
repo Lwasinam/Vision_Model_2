@@ -286,7 +286,8 @@ def train_model(config):
         num_elems = 0
         # batch_iterator = tqdm(v_dataloader, desc=f"Processing Epoch {epoch:02d}")
         with torch.no_grad():
-            for batch in val_dataloader:
+            batch_itere = tqdm(val_dataloader, desc=f"Processing loss")
+            for batch in batch_itere:
             
 
                 encoder_input = batch['encoder_input'].to(device) # (b, seq_len)
@@ -310,7 +311,7 @@ def train_model(config):
 
                 # Compute the loss using a simple cross entropy
                 ls = loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
-                batch_iterator.set_postfix({"loss": f"{ls.item():6.3f}"})
+                batch_itere.set_postfix({"loss": f"{ls.item():6.3f}"})
                 eval_loss += ls
                 # loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
            
