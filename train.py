@@ -28,7 +28,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 from accelerate import Accelerator
 
-accelerator = Accelerator()
 
 def greedy_decode(model, source, source_mask, tokenizer_tgt, max_len, device):
     sos_idx = tokenizer_tgt.token_to_id('[SOS]')
@@ -197,6 +196,8 @@ def get_model(config, vocab_tgt_len):
     return model
 
 def train_model(config):
+
+    accelerator = Accelerator()
 
     wandb.login(key = 'c20a1022142595d7d1324fdc53b3ccb34c0ded22')
     wandb.init(project="Vision", name=config['project_name'], resume=True)
