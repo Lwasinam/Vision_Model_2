@@ -200,7 +200,7 @@ def train_model(config):
     accelerator = Accelerator()
 
     wandb.login(key = 'c20a1022142595d7d1324fdc53b3ccb34c0ded22')
-    wandb.init(project="Vision", name=config['project_name'], resume=True)
+    wandb.init(project="Vision", name=config['project_name'])
 
     # Initialize WandB configuration
     wandb.config.epochs = config['num_epochs']
