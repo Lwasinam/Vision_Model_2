@@ -23,7 +23,12 @@ from tokenizers.pre_tokenizers import Whitespace
 
 import torchmetrics
 import wandb
+import accelerate
 from torch.utils.tensorboard import SummaryWriter
+
+from accelerate import Accelerator
+
+accelerator = Accelerator()
 
 def greedy_decode(model, source, source_mask, tokenizer_tgt, max_len, device):
     sos_idx = tokenizer_tgt.token_to_id('[SOS]')
@@ -202,7 +207,8 @@ def train_model(config):
     wandb.config.learning_rate = config['lr'] 
     # Define the devic
     # Define the device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = accelerator.device
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using device:", device)
 
     # Make sure the weights folder exists
@@ -213,6 +219,10 @@ def train_model(config):
    
 
     optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'], betas=(0.9, 0.98),eps=1e-9)
+
+    model, optimizer, train_dataloader, val_dataloader = accelerator.prepare(
+    model, optimizer, train_dataloader, val_dataloader
+)
 
     # If the user specified a model to preload before training, load it
     initial_epoch = 0
@@ -255,8 +265,9 @@ def train_model(config):
             # Log the loss
             wandb.log({"Training Loss": loss.item(), "Global Step": global_step})
 
-            # Backpropagate the loss
-            loss.backward()
+            # # Backpropagate the loss
+            # loss.backward()
+            accelerator.backward(loss)
 
             # Update the weights
             optimizer.step()
@@ -268,6 +279,10 @@ def train_model(config):
         # run_validation(model, val_dataloader, tokenizer_src, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
         model.eval()
         eval_loss = 0.0
+
+        #accelerate 
+        accurate = 0
+        num_elems = 0
         # batch_iterator = tqdm(v_dataloader, desc=f"Processing Epoch {epoch:02d}")
         with torch.no_grad():
             for batch in val_dataloader:
@@ -287,7 +302,10 @@ def train_model(config):
                 # (B, seq_len, vocab_size)
 
                 # Compare the output with the label
-                label = batch['label'].to(device) # (B, seq_len)
+                # label = batch['label'].to(device) # (B, seq_len)
+                proj_output, labels = accelerator.gather_for_metrics((
+                proj_output, batch["label"]
+            ))
 
                 # Compute the loss using a simple cross entropy
         
@@ -295,17 +313,19 @@ def train_model(config):
            
                 
         avg_val_loss = eval_loss / len(val_dataloader)
-        print(f'Epoch {epoch},Validation Loss: {avg_val_loss.item()}')
+        accelerator.print(f"Epoch {epoch},Validation Loss: {avg_eval_loss})Validation Loss: {avg_eval_loss}")
+        # print(f'Epoch {epoch},Validation Loss: {avg_val_loss.item()}')
         wandb.log({"Validation Loss": avg_val_loss.item(), "Global Step": global_step})
 
         # Save the model at the end of every epoch
         model_filename = get_weights_file_path(config, f"{epoch:02d}")
-        torch.save({
-            'epoch': epoch,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'global_step': global_step
-        }, model_filename)
+        # torch.save({
+        #     'epoch': epoch,
+        #     'model_state_dict': model.state_dict(),
+        #     'optimizer_state_dict': optimizer.state_dict(),
+        #     'global_step': global_step
+        # }, model_filename)
+        accelerator.save_model(model, model_filename)
         run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
 
 
