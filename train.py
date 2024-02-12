@@ -304,7 +304,7 @@ def train_model(config):
 
                 # Compare the output with the label
                 # label = batch['label'].to(device) # (B, seq_len)
-                proj_output, labels = accelerator.gather_for_metrics((
+                proj_output, label = accelerator.gather_for_metrics((
                 proj_output, batch["label"]
             ))
 
