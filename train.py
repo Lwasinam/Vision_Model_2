@@ -34,7 +34,7 @@ def greedy_decode(model, source, source_mask, tokenizer_tgt, max_len, device):
     eos_idx = tokenizer_tgt.token_to_id('[EOS]')
 
     # Precompute the encoder output and reuse it for every step
-    encoder_output = model.encode(source, None)
+    encoder_output = model.module.encode(source, None)
    
     # Initialize the decoder input with the sos token
     decoder_input = torch.empty(1, 1).fill_(sos_idx).long().to(device)
@@ -47,7 +47,7 @@ def greedy_decode(model, source, source_mask, tokenizer_tgt, max_len, device):
       
 
         # calculate output
-        out = model.decode(encoder_output, source_mask, decoder_input, decoder_mask)
+        out = model.module.decode(encoder_output, source_mask, decoder_input, decoder_mask)
         # print(f'out: {out.shape}')
 
         # Get next token probabilities with temperature applied
@@ -250,9 +250,9 @@ def train_model(config):
             decoder_mask = batch['decoder_mask'].to(device) # (B, 1, seq_len, seq_len)
 
             # Run the tensors through the encoder, decoder and the projection layer
-            encoder_output = model.encode(encoder_input, None) # (B, seq_len, d_model)
-            decoder_output = model.decode(encoder_output, None, decoder_input, decoder_mask) # (B, seq_len, d_model)
-            proj_output = model.project(decoder_output)
+            encoder_output = model.module.encode(encoder_input, None) # (B, seq_len, d_model)
+            decoder_output = model.module.decode(encoder_output, None, decoder_input, decoder_mask) # (B, seq_len, d_model)
+            proj_output = model.module.project(decoder_output)
             
              # (B, seq_len, vocab_size)
 
@@ -296,8 +296,8 @@ def train_model(config):
 
                 # Run the tensors through the encoder, decoder and the projection layer
             
-                encoder_output = model.encode(encoder_input, None) # (B, seq_len, d_model)
-                decoder_output = model.decode(encoder_output, None, decoder_input, decoder_mask)# (B, seq_len, d_model)
+                encoder_output = model.module.encode(encoder_input, None) # (B, seq_len, d_model)
+                decoder_output = model.module.decode(encoder_output, None, decoder_input, decoder_mask)# (B, seq_len, d_model)
                 proj_output = model.project(decoder_output)
             
                 # (B, seq_len, vocab_size)
