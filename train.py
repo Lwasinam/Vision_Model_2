@@ -298,7 +298,7 @@ def train_model(config):
             
                 encoder_output = model.module.encode(encoder_input, None) # (B, seq_len, d_model)
                 decoder_output = model.module.decode(encoder_output, None, decoder_input, decoder_mask)# (B, seq_len, d_model)
-                proj_output = model.project(decoder_output)
+                proj_output = model.module.project(decoder_output)
             
                 # (B, seq_len, vocab_size)
 
