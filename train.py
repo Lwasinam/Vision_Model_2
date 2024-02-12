@@ -242,84 +242,84 @@ def train_model(config):
     for epoch in range(initial_epoch, config['num_epochs']):
         model.train()
         batch_iterator = tqdm(train_dataloader, desc=f"Processing Epoch {epoch:02d}")
-        # for batch in batch_iterator:
-        #     # run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
-        #     encoder_input = batch['encoder_input'].to(device) # (b, seq_len)
-        #     decoder_input = batch['decoder_input'].to(device) # (B, seq_len)
-        #     encoder_mask = batch['encoder_mask'].to(device) # (B, 1, 1, seq_len)
-        #     decoder_mask = batch['decoder_mask'].to(device) # (B, 1, seq_len, seq_len)
+        for batch in batch_iterator:
+            # run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
+            encoder_input = batch['encoder_input'].to(device) # (b, seq_len)
+            decoder_input = batch['decoder_input'].to(device) # (B, seq_len)
+            encoder_mask = batch['encoder_mask'].to(device) # (B, 1, 1, seq_len)
+            decoder_mask = batch['decoder_mask'].to(device) # (B, 1, seq_len, seq_len)
 
-        #     # Run the tensors through the encoder, decoder and the projection layer
-        #     encoder_output = model.module.encode(encoder_input, None) # (B, seq_len, d_model)
-        #     decoder_output = model.module.decode(encoder_output, None, decoder_input, decoder_mask) # (B, seq_len, d_model)
-        #     proj_output = model.module.project(decoder_output)
+            # Run the tensors through the encoder, decoder and the projection layer
+            encoder_output = model.module.encode(encoder_input, None) # (B, seq_len, d_model)
+            decoder_output = model.module.decode(encoder_output, None, decoder_input, decoder_mask) # (B, seq_len, d_model)
+            proj_output = model.module.project(decoder_output)
             
-        #      # (B, seq_len, vocab_size)
+             # (B, seq_len, vocab_size)
 
-        #     # Compare the output with the label
-        #     label = batch['label'].to(device) # (B, seq_len)
+            # Compare the output with the label
+            label = batch['label'].to(device) # (B, seq_len)
 
-        #     # Compute the loss using a simple cross entropy
-        #     loss = loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
-        #     batch_iterator.set_postfix({"loss": f"{loss.item():6.3f}"})
+            # Compute the loss using a simple cross entropy
+            loss = loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
+            batch_iterator.set_postfix({"loss": f"{loss.item():6.3f}"})
 
-        #     # Log the loss
-        #     wandb.log({"Training Loss": loss.item(), "Global Step": global_step})
+            # Log the loss
+            wandb.log({"Training Loss": loss.item(), "Global Step": global_step})
 
-        #     # # Backpropagate the loss
-        #     # loss.backward()
-        #     accelerator.backward(loss)
+            # # Backpropagate the loss
+            # loss.backward()
+            accelerator.backward(loss)
 
-        #     # Update the weights
-        #     optimizer.step()
-        #     optimizer.zero_grad(set_to_none=True)
+            # Update the weights
+            optimizer.step()
+            optimizer.zero_grad(set_to_none=True)
 
-            # global_step += 1
+            global_step += 1
 
-        # # Run validation at the end of every epoch
-        # run_validation(model, val_dataloader, tokenizer_src, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
-        # model.eval()
-        # eval_loss = 0.0
+        # Run validation at the end of every epoch
+        run_validation(model, val_dataloader, tokenizer_src, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
+        model.eval()
+        eval_loss = 0.0
 
-        # #accelerate 
-        # accurate = 0
-        # num_elems = 0
-        # # batch_iterator = tqdm(v_dataloader, desc=f"Processing Epoch {epoch:02d}")
-        # with torch.no_grad():
-        #     batch_itere = tqdm(val_dataloader, desc=f"Processing loss")
-        #     for batch in batch_itere:
+        #accelerate 
+        accurate = 0
+        num_elems = 0
+        # batch_iterator = tqdm(v_dataloader, desc=f"Processing Epoch {epoch:02d}")
+        with torch.no_grad():
+            batch_itere = tqdm(val_dataloader, desc=f"Processing loss")
+            for batch in batch_itere:
             
 
-        #         encoder_input = batch['encoder_input'].to(device) # (b, seq_len)
-        #         decoder_input = batch['decoder_input'].to(device) # (B, seq_len)
-        #         encoder_mask = batch['encoder_mask'].to(device) # (B, 1, 1, seq_len)
-        #         decoder_mask = batch['decoder_mask'].to(device) # (B, 1, seq_len, seq_len)
+                encoder_input = batch['encoder_input'].to(device) # (b, seq_len)
+                decoder_input = batch['decoder_input'].to(device) # (B, seq_len)
+                encoder_mask = batch['encoder_mask'].to(device) # (B, 1, 1, seq_len)
+                decoder_mask = batch['decoder_mask'].to(device) # (B, 1, seq_len, seq_len)
 
-        #         # Run the tensors through the encoder, decoder and the projection layer
+                # Run the tensors through the encoder, decoder and the projection layer
             
-        #         encoder_output = model.module.encode(encoder_input, None) # (B, seq_len, d_model)
-        #         decoder_output = model.module.decode(encoder_output, None, decoder_input, decoder_mask)# (B, seq_len, d_model)
-        #         proj_output = model.module.project(decoder_output)
+                encoder_output = model.module.encode(encoder_input, None) # (B, seq_len, d_model)
+                decoder_output = model.module.decode(encoder_output, None, decoder_input, decoder_mask)# (B, seq_len, d_model)
+                proj_output = model.module.project(decoder_output)
             
-        #         # (B, seq_len, vocab_size)
+                # (B, seq_len, vocab_size)
 
-        #         # Compare the output with the label
-        #         # label = batch['label'].to(device) # (B, seq_len)
-        #         proj_output, label = accelerator.gather_for_metrics((
-        #         proj_output, batch["label"]
-        #     ))
+                # Compare the output with the label
+                # label = batch['label'].to(device) # (B, seq_len)
+                proj_output, label = accelerator.gather_for_metrics((
+                proj_output, batch["label"]
+            ))
 
-        #         # Compute the loss using a simple cross entropy
-        #         ls = loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
-        #         batch_itere.set_postfix({"loss": f"{ls.item():6.3f}"})
-        #         eval_loss += ls
-        #         # loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
+                # Compute the loss using a simple cross entropy
+                ls = loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
+                batch_itere.set_postfix({"loss": f"{ls.item():6.3f}"})
+                eval_loss += ls
+                # loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
            
                 
-        # avg_val_loss = eval_loss / len(val_dataloader)
-        # accelerator.print(f"Epoch {epoch},Validation Loss: {avg_eval_loss})Validation Loss: {avg_eval_loss}")
-        # # print(f'Epoch {epoch},Validation Loss: {avg_val_loss.item()}')
-        # wandb.log({"Validation Loss": avg_val_loss.item(), "Global Step": global_step})
+        avg_val_loss = eval_loss / len(val_dataloader)
+        accelerator.print(f"Epoch {epoch},Validation Loss: {avg_eval_loss})Validation Loss: {avg_eval_loss}")
+        # print(f'Epoch {epoch},Validation Loss: {avg_val_loss.item()}')
+        wandb.log({"Validation Loss": avg_val_loss.item(), "Global Step": global_step})
 
         # Save the model at the end of every epoch
         model_filename = get_weights_file_path(config, f"{epoch:02d}")
