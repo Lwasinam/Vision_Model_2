@@ -2,6 +2,9 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 from transformers import ViTFeatureExtractor
+from io import BytesIO
+from base64 import b64decode
+from PIL import Image
 
 # import model
 model_id = 'google/vit-base-patch16-224-in21k'
@@ -27,8 +30,10 @@ class BilingualDataset(Dataset):
 
     def __getitem__(self, idx):
         src_target_pair = self.ds[idx]
-        src_image = src_target_pair['image']
-        tgt_text = src_target_pair['en_text']
+        src_image = src_target_pair['image_base64_str']
+        tgt_text = src_target_pair['outputs']
+
+        src_target_pair  = Image.open(BytesIO(b64decode(''.join(src_target_pair))))
 
         if src_image.mode != 'RGB':
             src_image = src_image.convert('RGB')
