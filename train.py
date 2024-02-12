@@ -309,8 +309,10 @@ def train_model(config):
             ))
 
                 # Compute the loss using a simple cross entropy
-        
-                eval_loss += loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
+                ls = loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
+                batch_iterator.set_postfix({"loss": f"{ls.item():6.3f}"})
+                eval_loss += ls
+                # loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
            
                 
         avg_val_loss = eval_loss / len(val_dataloader)
