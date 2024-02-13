@@ -277,6 +277,15 @@ def train_model(config):
             global_step += 1
 
         # # Run validation at the end of every epoch
+            # Save the model at the end of every epoch
+        model_filename = get_weights_file_path(config, f"{epoch:02d}")
+        # torch.save({
+        #     'epoch': epoch,
+        #     'model_state_dict': model.state_dict(),
+        #     'optimizer_state_dict': optimizer.state_dict(),
+        #     'global_step': global_step
+        # }, model_filename)
+        accelerator.save_model(model, model_filename)
         # run_validation(model, val_dataloader, tokenizer_src, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
         model.eval()
         eval_loss = 0.0
@@ -321,15 +330,7 @@ def train_model(config):
         # print(f'Epoch {epoch},Validation Loss: {avg_val_loss.item()}')
         wandb.log({"Validation Loss": avg_val_loss.item(), "Global Step": global_step})
 
-        # Save the model at the end of every epoch
-        model_filename = get_weights_file_path(config, f"{epoch:02d}")
-        # torch.save({
-        #     'epoch': epoch,
-        #     'model_state_dict': model.state_dict(),
-        #     'optimizer_state_dict': optimizer.state_dict(),
-        #     'global_step': global_step
-        # }, model_filename)
-        accelerator.save_model(model, model_filename)
+    
         run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), 0)
 
 
