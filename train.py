@@ -231,12 +231,12 @@ def train_model(config):
     if config['preload']:
         model_filename = get_weights_file_path(config, config['preload'])
         print(f'Preloading model {model_filename}')
-        accelerator.load_state(model_filename)
-        # state = torch.load(model_filename)
-        # model.load_state_dict(state['model_state_dict'])
-        # initial_epoch = state['epoch'] + 1
-        # optimizer.load_state_dict(state['optimizer_state_dict'])
-        # global_step = state['global_step']
+        # accelerator.load_state(model_filename)
+        state = torch.load(model_filename)
+        model.load_state_dict(state['model_state_dict'])
+        initial_epoch = state['epoch'] + 1
+        optimizer.load_state_dict(state['optimizer_state_dict'])
+        global_step = state['global_step']
 
     loss_fn = nn.CrossEntropyLoss(ignore_index=tokenizer_tgt.token_to_id('[PAD]'), label_smoothing=0.1).to(device)
    
