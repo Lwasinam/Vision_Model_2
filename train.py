@@ -331,7 +331,7 @@ def train_model(config):
         wandb.log({"Validation Loss": avg_val_loss.item(), "Global Step": global_step})
 
     
-        run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), 0)
+        run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
 
 
 if __name__ == '__main__':
