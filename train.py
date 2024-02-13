@@ -317,7 +317,7 @@ def train_model(config):
            
                 
         avg_val_loss = eval_loss / len(val_dataloader)
-        accelerator.print(f"Epoch {epoch},Validation Loss: {avg_eval_loss})Validation Loss: {avg_eval_loss}")
+        accelerator.print(f"Epoch {epoch},Validation Loss: {avg_val_loss})Validation Loss: {avg_val_loss}")
         # print(f'Epoch {epoch},Validation Loss: {avg_val_loss.item()}')
         wandb.log({"Validation Loss": avg_val_loss.item(), "Global Step": global_step})
 
