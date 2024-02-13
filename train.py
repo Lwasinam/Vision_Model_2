@@ -232,6 +232,7 @@ def train_model(config):
         model_filename = get_weights_file_path(config, config['preload'])
         print(f'Preloading model {model_filename}')
         model = accelerate.load_checkpoint_in_model(model, model_filename)
+        state_dict = accelerator.get_state_dict(model)
         # state = torch.load(model_filename)
         # model.load_state_dict(state['model_state_dict'])
         # initial_epoch = state['epoch'] + 1
