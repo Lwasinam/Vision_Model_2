@@ -232,7 +232,7 @@ def train_model(config):
         model_filename = get_weights_file_path(config, config['preload'])
         print(f'Preloading model {model_filename}')
         accelerator.load_state(model_filename)
-        state_dict = accelerator.get_state_dict(net)
+        state_dict = accelerator.get_state_dict(model)
         print(state_dict)
    
         # state = torch.load(model_filename)
