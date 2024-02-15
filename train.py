@@ -289,7 +289,7 @@ def train_model(config):
         #     'global_step': global_step
         # }, model_filename)
         # accelerator.save_model(model, model_filename)
-        accelerator.save_state(output_dir='/kaggle/working/weights/tmodel_01')
+        accelerator.save_state(output_dir='/kaggle/working/weights/tmodel_00')
         # run_validation(model, val_dataloader, tokenizer_src, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
         model.eval()
         eval_loss = 0.0
