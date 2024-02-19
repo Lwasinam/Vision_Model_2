@@ -29,17 +29,17 @@ class PatchEmbed(nn.Module):
         Convolutional layer that does both the splitting into patches
         and their embedding.
     """
-    def __init__(self, img_size, patch_size, in_chans=3, embed_dim=768):
+    def __init__(self, img_size, patch_size, in_chans=3, embed_dim=768, num_registers = 4):
         super().__init__()
         self.img_size = img_size
         self.patch_size = patch_size
         self.n_patches = (img_size // patch_size) ** 2
         self.pos_embed = nn.Parameter(
-                torch.zeros(1, self.n_patches+1, embed_dim)
+                torch.zeros(1, self.n_patches+1+num_registers, embed_dim)
         )
          # Adding CLS token as a learnable parameter
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
-
+        self.register_token = nn.Parameter(torch.zeros(num_registers, embed_dim))
 
         self.proj = nn.Conv2d(
                 in_chans,
@@ -61,17 +61,38 @@ class PatchEmbed(nn.Module):
         torch.Tensor
             Shape `(n_samples, n_patches, embed_dim)`.
         """
-        x = self.proj(
-                x
-            )  # (n_samples, embed_dim, n_patches ** 0.5, n_patches ** 0.5)
+        x = self.proj(x)  # (n_samples, embed_dim, n_patches ** 0.5, n_patches ** 0.5)
         x = x.flatten(2)  # (n_samples, embed_dim, n_patches)
         x = x.transpose(1, 2) # (n_samples, n_patches, embed_dim)
         batch_size = x.shape[0]
+
+
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)  # Expand CLS tokens for the batch
         x = torch.cat([cls_tokens, x], dim=1)
+
+        # x: (n_samples, n_patches + 1 + num_registers, embed_dimension) add register tokens
+        register_tokens = self.register_token.unsqueeze(0).expand(batch_size, -1, -1) 
+        x = torch.cat([x, register_tokens], dim=1)
+
         x = x + self.pos_embed  # Learnable pos embed -> (n_samples, n_patches_embed_dim) 
     
         return x
+class RMSNorm(nn.Module):
+    def __init__(self, dim: 768, eps: float = 1e-6):
+        super().__init__()
+        self.eps = eps
+        # The gamma parameter
+        self.weight = nn.Parameter(torch.ones(dim))
+
+    def _norm(self, x: torch.Tensor):
+        # (B, Seq_Len, Dim) * (B, Seq_Len, 1) = (B, Seq_Len, Dim)
+        # rsqrt: 1 / sqrt(x)
+        return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
+
+    def forward(self, x: torch.Tensor):
+        # (Dim) * (B, Seq_Len, Dim) = (B, Seq_Len, Dim)
+        return self.weight * self._norm(x.float()).type_as(x)
+
 class LayerNormalization(nn.Module):
 
     def __init__(self, eps:float=10**-6) -> None:
@@ -146,7 +167,7 @@ class ResidualConnection(nn.Module):
         def __init__(self, dropout: float) -> None:
             super().__init__()
             self.dropout = nn.Dropout(dropout)
-            self.norm = LayerNormalization()
+            self.norm = RMSNorm()
     
         def forward(self, x, sublayer):
             return x + self.dropout(sublayer(self.norm(x)))
@@ -226,7 +247,7 @@ class Encoder(nn.Module):
     def __init__(self, layers: nn.ModuleList) -> None:
         super().__init__()
         self.layers = layers
-        self.norm = LayerNormalization()
+        self.norm = RMSNorm()
 
     def forward(self, x, mask):
         for layer in self.layers:
@@ -244,7 +265,7 @@ class DecoderBlock(nn.Module):
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
         x = self.residual_connections[0](x, lambda x: self.self_attention_block(x, x, x, tgt_mask))
-        x = self.residual_connections[1](x, lambda x: self.cross_attention_block(x, encoder_output, encoder_output, src_mask))
+        x = self.residual_connections[1](x, lambda x: self.cross_attention_block(x, encoder_output, encoder_output, src_mask,))
         x = self.residual_connections[2](x, self.feed_forward_block)
         return x
     
@@ -253,7 +274,7 @@ class Decoder(nn.Module):
     def __init__(self, layers: nn.ModuleList) -> None:
         super().__init__()
         self.layers = layers
-        self.norm = LayerNormalization()
+        self.norm = RMSNorm()
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
         for layer in self.layers:
@@ -300,7 +321,7 @@ class Transformer(nn.Module):
         # (batch, seq_len, vocab_size)
         return self.projection_layer(x)
     
-def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=768, N: int=12, h: int=8, dropout: float=0.4, d_ff: int=2048) -> Transformer:
+def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=768, N: int=8, h: int=8, dropout: float=0.4, d_ff: int=2048) -> Transformer:
     # Create the embedding layers
   
     tgt_embed = InputEmbeddings(d_model, tgt_vocab_size)
