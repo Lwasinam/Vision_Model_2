@@ -81,8 +81,9 @@ class RMSNorm(nn.Module):
     def __init__(self, dim: 768, eps: float = 1e-6):
         super().__init__()
         self.eps = eps
+        self.dim = divmod
         # The gamma parameter
-        self.weight = nn.Parameter(torch.ones(dim))
+        self.weight = nn.Parameter(torch.ones(self.dim))
 
     def _norm(self, x: torch.Tensor):
         # (B, Seq_Len, Dim) * (B, Seq_Len, 1) = (B, Seq_Len, Dim)
