@@ -78,7 +78,7 @@ class PatchEmbed(nn.Module):
     
         return x
 class RMSNorm(nn.Module):
-    def __init__(self, dim: 768, eps: float = 1e-6):
+    def __init__(self, dim: int = 768, eps: float = 1e-6):
         super().__init__()
         self.eps = eps
         self.dim = divmod
