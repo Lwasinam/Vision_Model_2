@@ -232,7 +232,7 @@ def train_model(config):
         model_filename = get_weights_file_path(config, config['preload'])
         print(f'Preloading model {model_filename}')
         accelerator.load_state(model_filename)
-        initial_epoch = 3
+        initial_epoch = 4
    
         # state = torch.load(model_filename)
         # model.load_state_dict(state['model_state_dict'])
