@@ -40,7 +40,7 @@ class PatchEmbed(nn.Module):
         Convolutional layer that does both the splitting into patches
         and their embedding.
     """
-    def __init__(self, img_size, patch_size, in_chans=3, embed_dim=768, num_registers = 4):
+    def __init__(self, img_size, patch_size, in_chans=3, embed_dim=512, num_registers = 4):
         super().__init__()
         self.img_size = img_size
         self.patch_size = patch_size
@@ -393,7 +393,7 @@ class Transformer(nn.Module):
 
 #     # # Save the blended image
 #     # blended_image.save(f"blended_attention_visualization_{str(int(round(time.time() * 1000)))}.png")
-def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=768, N: int=8, h: int=8, dropout: float=0.4, d_ff: int=2048) -> Transformer:
+def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=512, N: int=8, h: int=8, dropout: float=0.4, d_ff: int=1024) -> Transformer:
     # Create the embedding layers
   
     tgt_embed = InputEmbeddings(d_model, tgt_vocab_size)
