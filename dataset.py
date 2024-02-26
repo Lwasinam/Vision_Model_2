@@ -57,7 +57,7 @@ class BilingualDataset(Dataset):
         # # Add sos, eos and padding to each sentence
         # enc_num_padding_tokens = self.seq_len - len(enc_input_tokens) - 2  # We will add <s> and </s>
         # We will only add <s>, and </s> only on the label
-        print(f'lenght{len(dec_input_tokens)}')
+        dec_input_tokens = dec_input_tokens[:self.seq_len]
         dec_num_padding_tokens = self.seq_len - len(dec_input_tokens) - 1
 
         # Make sure the number of padding tokens is not negative. If it is, the sentence is too long
