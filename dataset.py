@@ -5,6 +5,7 @@ from transformers import ViTFeatureExtractor
 from io import BytesIO
 from base64 import b64decode
 from PIL import Image
+import base64
 
 # import model
 model_id = 'google/vit-base-patch16-224-in21k'
@@ -33,13 +34,13 @@ class BilingualDataset(Dataset):
         src_image = src_target_pair['image']
         tgt_text = src_target_pair['text']
 
-        base64_bytes = base64.b64encode(src_image)
+        # base64_bytes = base64.b64encode(src_image)
        
 
-        src_image = base64_bytes.decode()
+        # src_image = base64_bytes.decode()
         
 
-        src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
+        # src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
 
         if src_image.mode != 'RGB':
             src_image = src_image.convert('RGB')
