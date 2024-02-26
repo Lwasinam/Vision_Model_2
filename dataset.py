@@ -33,6 +33,12 @@ class BilingualDataset(Dataset):
         src_image = src_target_pair['image']
         tgt_text = src_target_pair['text']
 
+        base64_bytes = base64.b64encode(src_image)
+       
+
+        src_image = base64_bytes.decode()
+        
+
         src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
 
         if src_image.mode != 'RGB':
