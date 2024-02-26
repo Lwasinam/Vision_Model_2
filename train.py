@@ -143,7 +143,7 @@ def run_validation(model, validation_ds,tokenizer_tgt, max_len, device, print_ms
 
 def get_all_sentences(ds):
     for item in ds:
-        yield item['outputs']
+        yield item['text']
 def batch_iterator(data):
     for i in range(0, len(data)):
         yield data[i]['text'] 
@@ -169,7 +169,7 @@ def get_or_build_tokenizer(config, ds):
 def get_ds(config):
     # It only has the train split, so we divide it overselves
     # ds_raw = load_dataset("HausaNLP/HausaVG", split='train+validation+test+challenge_test')
-    ds_raw = load_dataset("AlFrauch/im2latex", 'coco', split='train')
+    ds_raw = load_dataset("AlFrauch/im2latex", split='train')
     # ds_raw = load_dataset('opus_books', f"{config['lang_src']}-{config['lang_tgt']}", split='train')
 
     # Build tokenizers
