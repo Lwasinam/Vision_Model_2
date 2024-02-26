@@ -1,6 +1,17 @@
 import torch
 import torch.nn as nn
 import math
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+from torchvision.transforms.functional import to_pil_image, to_tensor
+import time
+import numpy as np
+from matplotlib.image import imread
+from transformers import ViTFeatureExtractor
+from io import BytesIO
+from base64 import b64decode
+import base64
 
 ## code from @jankrepl on github
 class PatchEmbed(nn.Module):
@@ -206,9 +217,11 @@ class MultiHeadAttentionBlock(nn.Module):
             attention_scores = dropout(attention_scores)
         # (batch, h, seq_len, seq_len) --> (batch, h, seq_len, d_k)
         # return attention scores which can be used for visualization
+
+        # attention_viz(attention_scores)
         return (attention_scores @ value), attention_scores
 
-    def forward(self, q, k, v, mask):
+    def forward(self, q, k, v, mask, is_cross=False):
         query = self.w_q(q) # (batch, seq_len, d_model) --> (batch, seq_len, d_model)
         key = self.w_k(k) # (batch, seq_len, d_model) --> (batch, seq_len, d_model)
         value = self.w_v(v) # (batch, seq_len, d_model) --> (batch, seq_len, d_model)
@@ -221,7 +234,8 @@ class MultiHeadAttentionBlock(nn.Module):
         # Calculate attention
         x, self.attention_scores = MultiHeadAttentionBlock.attention(query, key, value, mask, self.dropout)
         
-        
+        if is_cross:
+            attention_viz(self.attention_scores)
         # Combine all the heads together
         # (batch, h, seq_len, d_k) --> (batch, seq_len, h, d_k) --> (batch, seq_len, d_model)
         x = x.transpose(1, 2).contiguous().view(x.shape[0], -1, self.h * self.d_k)
@@ -266,8 +280,9 @@ class DecoderBlock(nn.Module):
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
         x = self.residual_connections[0](x, lambda x: self.self_attention_block(x, x, x, tgt_mask))
-        x = self.residual_connections[1](x, lambda x: self.cross_attention_block(x, encoder_output, encoder_output, src_mask,))
+        x = self.residual_connections[1](x, lambda x: self.cross_attention_block(x, encoder_output, encoder_output, src_mask))
         x = self.residual_connections[2](x, self.feed_forward_block)
+        
         return x
     
 class Decoder(nn.Module):
@@ -321,7 +336,63 @@ class Transformer(nn.Module):
     def project(self, x):
         # (batch, seq_len, vocab_size)
         return self.projection_layer(x)
+# def attention_viz(attention_scores):
     
+
+#         # Assuming attention_scores is your extracted attention matrix
+#         # and replace 'your_image_path.jpg' with the actual path to your image.
+
+#         # Load the original image
+#     original_image = Image.open('5.jpg')  # Replace with the actual path to your image
+
+#     # Transpose attention_scores to have the shape (1, 8, 1, 261)
+#     attention_scores = attention_scores.unsqueeze(0).unsqueeze(2)
+
+#     # Resize attention matrix to match the original image dimensions
+#     attention_scores_resized = torch.nn.functional.interpolate(
+#         attention_scores,
+#         size=(original_image.height, original_image.width),
+#         mode='bilinear',
+#         align_corners=False
+#     ).squeeze(0).squeeze(2).squeeze(0)  # Remove batch and channel dimensions
+
+#     # Convert to numpy for visualization
+#     attention_scores_np = attention_scores_resized.detach().cpu().numpy()
+#     heatmap = np.maximum(attention_scores_np, 0)
+#     heatmap /= np.max(heatmap)
+
+#     # Convert original image to float and normalize
+#     original_image = np.array(original_image).astype(float) / 255.0
+
+#     # Resize the heatmap to match the original image dimensions
+#     heatmap = np.expand_dims(heatmap, axis=-1)  # Add a channel dimension
+#     heatmap = np.repeat(heatmap, 3, axis=-1)  # Repeat the single channel heatmap to match the 3 channels of the original image
+
+#     # Apply heatmap to original image
+#     final_img = heatmap * 0.4 + original_image * 0.6
+
+#     # Show image with heatmap
+#     plt.imshow(final_img)
+#     plt.axis('off')
+
+#     # # Save the image
+#     # plt.savefig('output_image.png', bbox_inches='tight', pad_inches=0)
+
+#     # Display the plot
+#     plt.show()
+
+
+
+
+
+#     # Save the image
+#     plt.savefig(f"output_image.png_{str(int(round(time.time() * 1000)))}", bbox_inches='tight', pad_inches=0)
+
+#     # # Display the plot
+#     # plt.show()
+
+#     # # Save the blended image
+#     # blended_image.save(f"blended_attention_visualization_{str(int(round(time.time() * 1000)))}.png")
 def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=768, N: int=8, h: int=8, dropout: float=0.4, d_ff: int=2048) -> Transformer:
     # Create the embedding layers
   

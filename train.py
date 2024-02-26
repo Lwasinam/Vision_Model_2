@@ -2,7 +2,7 @@ from model import build_transformer
 from dataset import BilingualDataset, causal_mask
 from config import get_config, get_weights_file_path
 
-import torchtext.datasets as datasets
+import datasets
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -146,7 +146,7 @@ def get_all_sentences(ds):
         yield item['outputs']
 def batch_iterator(data):
     for i in range(0, len(data)):
-        yield data[i]['en_text'] 
+        yield data[i]['text'] 
 
 # Assuming batch_iterator is a function that yields batches
 def tqdm_batch_iterator(data, *args, **kwargs):
@@ -169,7 +169,7 @@ def get_or_build_tokenizer(config, ds):
 def get_ds(config):
     # It only has the train split, so we divide it overselves
     # ds_raw = load_dataset("HausaNLP/HausaVG", split='train+validation+test+challenge_test')
-    ds_raw = load_dataset("MMInstruction/M3IT", 'coco', split='train+validation+test')
+    ds_raw = load_dataset("AlFrauch/im2latex", 'coco', split='train')
     # ds_raw = load_dataset('opus_books', f"{config['lang_src']}-{config['lang_tgt']}", split='train')
 
     # Build tokenizers
@@ -232,7 +232,7 @@ def train_model(config):
         model_filename = get_weights_file_path(config, config['preload'])
         print(f'Preloading model {model_filename}')
         accelerator.load_state(model_filename)
-        initial_epoch = 4
+        initial_epoch = 1
    
         # state = torch.load(model_filename)
         # model.load_state_dict(state['model_state_dict'])

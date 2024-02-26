@@ -30,8 +30,8 @@ class BilingualDataset(Dataset):
 
     def __getitem__(self, idx):
         src_target_pair = self.ds[idx]
-        src_image = src_target_pair['image_base64_str']
-        tgt_text = src_target_pair['outputs']
+        src_image = src_target_pair['image']
+        tgt_text = src_target_pair['text']
 
         src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
 
