@@ -197,7 +197,7 @@ def get_model(config, vocab_tgt_len):
 
 def train_model(config):
 
-    accelerator = Accelerator()
+    accelerator = Accelerator(mixed_precision='fp16')
 
     wandb.login(key = 'c20a1022142595d7d1324fdc53b3ccb34c0ded22')
     wandb.init(project="Vision", name=config['project_name'])
