@@ -40,7 +40,7 @@ class PatchEmbed(nn.Module):
         Convolutional layer that does both the splitting into patches
         and their embedding.
     """
-    def __init__(self, img_size, patch_size, in_chans=3, embed_dim=512, num_registers = 4):
+    def __init__(self, img_size, patch_size, in_chans=3, embed_dim=768, num_registers = 4):
         super().__init__()
         self.img_size = img_size
         self.patch_size = patch_size
