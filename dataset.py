@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, IterableDataset
+from torch.utils.data import IterableDataset
 from transformers import ViTFeatureExtractor
 from io import BytesIO
 from base64 import b64decode
