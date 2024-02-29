@@ -28,7 +28,8 @@ class BilingualDataset(Dataset):
 
     def __len__(self):
         return 1200000
-
+    def __iter__(self):
+        yield 'encoder'
     def generate(self, idx):
         for i in self.ds:
 
