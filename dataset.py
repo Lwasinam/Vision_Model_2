@@ -30,7 +30,7 @@ class BilingualDataset(IterableDataset):
         return 1200000
     def __iter__(self):
         return iter (self.generate())
-    def generate(self, idx):
+    def generate(self):
         
 
         
