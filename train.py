@@ -173,9 +173,9 @@ def get_or_build_tokenizer(config, ds):
 def get_ds(config):
     # It only has the train split, so we divide it overselves
     # ds_raw = load_dataset("HausaNLP/HausaVG", split='train+validation+test+challenge_test')
-    train_ds_raw =  load_dataset("laion/conceptual-captions-12m-webdataset", split='train[:90%]', streaming=True)
+    train_ds_raw =  load_dataset("laion/conceptual-captions-12m-webdataset", split='train', streaming=True)
     train_ds_raw.shuffle(20, buffer_size = 1000)
-    val_ds_raw =  load_dataset("laion/conceptual-captions-12m-webdataset", split='train[-1%:]', streaming=True)
+    val_ds_raw =  load_dataset("laion/conceptual-captions-12m-webdataset", split='train', streaming=True)
     val_ds_raw.shuffle(20, buffer_size = 1000) 
     # ds_raw = load_dataset('opus_books', f"{config['lang_src']}-{config['lang_tgt']}", split='train')
 
