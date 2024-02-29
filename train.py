@@ -267,10 +267,10 @@ def train_model(config):
         for batch in batch_iterator:
            
             # run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
-            encoder_input = batch['encoder_input'].to(device) # (b, seq_len)
-            decoder_input = batch['decoder_input'].to(device) # (B, seq_len)
-            encoder_mask = batch['encoder_mask'].to(device) # (B, 1, 1, seq_len)
-            decoder_mask = batch['decoder_mask'].to(device) # (B, 1, seq_len, seq_len)
+            encoder_input = batch[0]['encoder_input'].to(device) # (b, seq_len)
+            decoder_input = batch[1]['decoder_input'].to(device) # (B, seq_len)
+            encoder_mask = batch[2]['encoder_mask'].to(device) # (B, 1, 1, seq_len)
+            decoder_mask = batch[4]['decoder_mask'].to(device) # (B, 1, seq_len, seq_len)
 
             # Run the tensors through the encoder, decoder and the projection layer
             encoder_output = model.module.encode(encoder_input, None) # (B, seq_len, d_model)
