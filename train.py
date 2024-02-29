@@ -264,13 +264,13 @@ def train_model(config):
 
         model.train()
         batch_iterator = tqdm(train_dataloader, desc=f"Processing Epoch {epoch:02d}")
-        for batch in batch_iterator:
+        for encoder_input, decoder_input, encoder_mask, decoder_mask, label, tgt_text in batch_iterator:
            
             # run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
-            encoder_input = batch[0]['encoder_input'].to(device) # (b, seq_len)
-            decoder_input = batch[1]['decoder_input'].to(device) # (B, seq_len)
-            encoder_mask = batch[2]['encoder_mask'].to(device) # (B, 1, 1, seq_len)
-            decoder_mask = batch[4]['decoder_mask'].to(device) # (B, 1, seq_len, seq_len)
+            encoder_input.to(device) # (b, seq_len)
+            decoder_input.to(device) # (B, seq_len)
+            encoder_mask.to(device) # (B, 1, 1, seq_len)
+            decoder_mask.to(device) # (B, 1, seq_len, seq_len)
 
             # Run the tensors through the encoder, decoder and the projection layer
             encoder_output = model.module.encode(encoder_input, None) # (B, seq_len, d_model)
