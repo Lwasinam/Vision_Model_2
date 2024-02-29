@@ -113,7 +113,7 @@ class BilingualDataset(IterableDataset):
             label =label,  # (seq_len)
                     # "src_text": src_text,
             tgt_text = tgt_text
-            yield encoder_input, dec_input_tokens, encoder_mask, decoder_mask, label, tgt_text
+            yield encoder_input, decoder_input, encoder_mask, decoder_mask, label, tgt_text
                 
     
 def causal_mask(size):
