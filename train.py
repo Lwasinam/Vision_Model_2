@@ -205,8 +205,7 @@ def get_model(config, vocab_tgt_len):
 def train_model(config):
 
     accelerator = Accelerator()
-    def save_model():
-        accelerator.save_state(output_dir=f'/kaggle/working/weights/tmodel_00')
+  
 
 
     wandb.login(key = 'c20a1022142595d7d1324fdc53b3ccb34c0ded22')
@@ -238,8 +237,10 @@ def train_model(config):
     # If the user specified a model to preload before training, load it
     initial_epoch = 0
     global_step = 0
-    accelerator.register_for_checkpointing(global_step)
-
+    def save_model():
+        accelerator.save_state(output_dir=f'/kaggle/working/weights/tmodel_00')
+        print(f'saving global step {global_step}')
+    
     if config['preload']:
         model_filename = get_weights_file_path(config, config['preload'])
         print(f'Preloading model {model_filename}')
