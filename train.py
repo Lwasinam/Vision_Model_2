@@ -191,10 +191,10 @@ def get_ds(config):
 
     train_ds = BilingualDataset(train_ds_raw, tokenizer_tgt,  config['seq_len'])
     val_ds = BilingualDataset(val_ds_raw, tokenizer_tgt, config['seq_len'])
-    
+     print(train_dataloader)
 
     train_dataloader = DataLoader(train_ds, )
-    print(train_dataloader)
+   
     val_dataloader = DataLoader(val_ds,)
 
     return train_dataloader, val_dataloader, tokenizer_tgt
