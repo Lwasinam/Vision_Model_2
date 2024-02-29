@@ -194,6 +194,7 @@ def get_ds(config):
     
 
     train_dataloader = DataLoader(train_ds, )
+    print(train_dataloader)
     val_dataloader = DataLoader(val_ds,)
 
     return train_dataloader, val_dataloader, tokenizer_tgt
