@@ -29,13 +29,13 @@ class BilingualDataset(IterableDataset):
     def __len__(self):
         return 1200000
     def __iter__(self):
-        yield 'encoder'
+        return iter (self.generate())
     def generate(self, idx):
-        for i in self.ds:
+        
 
         
-            src_image = i['jpg']
-            tgt_text = i['txt']
+        src_image = self.ds['jpg']
+        tgt_text = self.ds['txt']
 
         # base64_bytes = base64.b64encode(src_image)
        
@@ -45,27 +45,27 @@ class BilingualDataset(IterableDataset):
 
         # src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
 
-            if src_image.mode != 'RGB':
-                src_image = src_image.convert('RGB')
+        if src_image.mode != 'RGB':
+            src_image = src_image.convert('RGB')
             
-            enc_input = feature_extractor(
-            src_image,
-            return_tensors='pt'
-            )
+        enc_input = feature_extractor(
+        src_image,
+        return_tensors='pt'
+        )
             
 
             # Transform the text into tokens
-            dec_input_tokens = self.tokenizer_tgt.encode(tgt_text)
+        dec_input_tokens = self.tokenizer_tgt.encode(tgt_text)
 
             # # Add sos, eos and padding to each sentence
             # enc_num_padding_tokens = self.seq_len - len(enc_input_tokens) - 2  # We will add <s> and </s>
             # We will only add <s>, and </s> only on the label
-            dec_input_tokens = dec_input_tokens[:self.seq_len-1]
-            dec_num_padding_tokens = self.seq_len - len(dec_input_tokens) -1
+        dec_input_tokens = dec_input_tokens[:self.seq_len-1]
+        dec_num_padding_tokens = self.seq_len - len(dec_input_tokens) -1
 
             # Make sure the number of padding tokens is not negative. If it is, the sentence is too long
-            if dec_num_padding_tokens < 0:
-                raise ValueError("Sentence is too long")
+        if dec_num_padding_tokens < 0:
+            raise ValueError("Sentence is too long")
 
             # # Add <s> and </s> token
             # encoder_input = torch.cat(
@@ -79,7 +79,7 @@ class BilingualDataset(IterableDataset):
             # )
 
             # Add only <s> token
-            decoder_input = torch.cat(
+        decoder_input = torch.cat(
                 [
                     self.sos_token,
                     torch.tensor(dec_input_tokens, dtype=torch.int64),
@@ -89,7 +89,7 @@ class BilingualDataset(IterableDataset):
             )
 
             # Add only </s> token
-            label = torch.cat(
+        label = torch.cat(
                 [
                     torch.tensor(dec_input_tokens, dtype=torch.int64),
                     self.eos_token,
@@ -99,10 +99,10 @@ class BilingualDataset(IterableDataset):
             )
 
 
-            assert decoder_input.size(0) == self.seq_len
-            assert label.size(0) == self.seq_len
+        assert decoder_input.size(0) == self.seq_len
+        assert label.size(0) == self.seq_len
 
-            yield {
+        yield {
                 "encoder_input": enc_input['pixel_values'][0],  # (seq_len)
                 "decoder_input": decoder_input,  # (seq_len)
                 "encoder_mask": (torch.cat((torch.ones(197,),torch.zeros(63),),)).unsqueeze(0).unsqueeze(0), # (1, 1, seq_len)
