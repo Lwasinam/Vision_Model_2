@@ -108,7 +108,7 @@ class BilingualDataset(IterableDataset):
             decoder_input = decoder_input  # (seq_len)
             encoder_mask = (torch.cat((torch.ones(197,),torch.zeros(63),),)).unsqueeze(0).unsqueeze(0) # (1, 1, seq_len)
             decoder_mask = (decoder_input != self.pad_token).unsqueeze(0).int() & causal_mask(decoder_input.size(0)) # (1, seq_len) & (1, seq_len, seq_len),
-            label =label,  # (seq_len)
+            label = label  # (seq_len)
                     # "src_text": src_text,
             tgt_text = tgt_text
             yield encoder_input, decoder_input, encoder_mask, decoder_mask, label
