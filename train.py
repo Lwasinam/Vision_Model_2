@@ -191,7 +191,7 @@ def get_ds(config):
 
     train_ds = BilingualDataset(train_ds_raw, tokenizer_tgt,  config['seq_len'])
     val_ds = BilingualDataset(val_ds_raw, tokenizer_tgt, config['seq_len'])
-    print(train_dataloader)
+    print(train_ds)
 
     train_dataloader = DataLoader(train_ds, )
    
