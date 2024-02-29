@@ -12,7 +12,7 @@ model_id = 'google/vit-base-patch16-224-in21k'
 feature_extractor = ViTFeatureExtractor.from_pretrained(
     model_id
 )
-class BilingualDataset(Dataset):
+class BilingualDataset(IterableDataset):
 
     def __init__(self, ds,tokenizer_tgt, seq_len):
         super().__init__()
