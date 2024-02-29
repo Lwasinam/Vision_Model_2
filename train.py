@@ -6,7 +6,7 @@ import datasets
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset, IterableDataset, DataLoader, random_split
 from torch.optim.lr_scheduler import LambdaLR
 
 import warnings
@@ -193,8 +193,8 @@ def get_ds(config):
     val_ds = BilingualDataset(val_ds_raw, tokenizer_tgt, config['seq_len'])
     
 
-    train_dataloader = DataLoader(train_ds, batch_size=config['batch_size'])
-    val_dataloader = DataLoader(val_ds, batch_size=1)
+    train_dataloader = DataLoader(train_ds, )
+    val_dataloader = DataLoader(val_ds,)
 
     return train_dataloader, val_dataloader, tokenizer_tgt
 
