@@ -258,8 +258,8 @@ def train_model(config):
    
     for epoch in range(initial_epoch, config['num_epochs']):
 
-        timer = threading.Timer(5*60, save_models)
-        timer.start()
+        # timer = threading.Timer(5*60, save_models)
+        # timer.start()
 
         model.train()
         batch_iterator = tqdm(train_dataloader, desc=f"Processing Epoch {epoch:02d}")
