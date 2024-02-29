@@ -28,6 +28,8 @@ class BilingualDataset(IterableDataset):
 
     # def __len__(self):
     #     return 1200000
+    def __getitem__(self):
+        pass
     def __iter__(self):
         return iter (self.generate())
     def generate(self):
