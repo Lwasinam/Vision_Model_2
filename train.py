@@ -193,9 +193,9 @@ def get_ds(config):
     val_ds = BilingualDataset(val_ds_raw, tokenizer_tgt, config['seq_len'])
     print(train_ds)
 
-    train_dataloader = DataLoader(train_ds, )
+    train_dataloader = DataLoader(train_ds,batch_size=config['batch_size'] )
    
-    val_dataloader = DataLoader(val_ds,)
+    val_dataloader = DataLoader(val_ds,batch_size=1)
 
     return train_dataloader, val_dataloader, tokenizer_tgt
 
@@ -265,6 +265,7 @@ def train_model(config):
         model.train()
         batch_iterator = tqdm(train_dataloader, desc=f"Processing Epoch {epoch:02d}")
         for batch in batch_iterator:
+            print(batch['encoder_input'])
             # run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
             encoder_input = batch['encoder_input'].to(device) # (b, seq_len)
             decoder_input = batch['decoder_input'].to(device) # (B, seq_len)
