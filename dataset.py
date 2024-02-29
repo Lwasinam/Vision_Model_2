@@ -35,7 +35,7 @@ class BilingualDataset(IterableDataset):
     def generate(self):
         for item in self.ds:
 
-        
+            print(item)
             src_image = item['jpg']
             tgt_text = item['txt']
 
