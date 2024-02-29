@@ -26,8 +26,8 @@ class BilingualDataset(IterableDataset):
         self.eos_token = torch.tensor([tokenizer_tgt.convert_tokens_to_ids("[EOS]")], dtype=torch.int64)
         self.pad_token = torch.tensor([tokenizer_tgt.convert_tokens_to_ids("[PAD]")], dtype=torch.int64)
 
-    def __len__(self):
-        return 1200000
+    # def __len__(self):
+    #     return 1200000
     def __iter__(self):
         return iter (self.generate())
     def generate(self):
