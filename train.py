@@ -6,7 +6,7 @@ import datasets
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, IterableDataset, DataLoader, random_split
+from torch.utils.data import IterableDataset, DataLoader, random_split
 from torch.optim.lr_scheduler import LambdaLR
 
 import warnings
