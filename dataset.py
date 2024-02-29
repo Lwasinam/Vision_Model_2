@@ -22,17 +22,17 @@ class BilingualDataset(Dataset):
         self.tokenizer_tgt = tokenizer_tgt
         # self.tgt_lang = tgt_lang
 
-        self.sos_token = torch.tensor([tokenizer_tgt.token_to_id("[SOS]")], dtype=torch.int64)
-        self.eos_token = torch.tensor([tokenizer_tgt.token_to_id("[EOS]")], dtype=torch.int64)
-        self.pad_token = torch.tensor([tokenizer_tgt.token_to_id("[PAD]")], dtype=torch.int64)
+        self.sos_token = torch.tensor([tokenizer_tgt.convert_tokens_to_id("[SOS]")], dtype=torch.int64)
+        self.eos_token = torch.tensor([tokenizer_tgt.convert_tokens_to_id("[EOS]")], dtype=torch.int64)
+        self.pad_token = torch.tensor([tokenizer_tgt.convert_tokens_to_id("[PAD]")], dtype=torch.int64)
 
     def __len__(self):
         return len(self.ds)
 
     def __getitem__(self, idx):
         src_target_pair = self.ds[idx]
-        src_image = src_target_pair['image']
-        tgt_text = src_target_pair['text']
+        src_image = src_target_pair['jpg']
+        tgt_text = src_target_pair['txt']
 
         # base64_bytes = base64.b64encode(src_image)
        
@@ -52,7 +52,7 @@ class BilingualDataset(Dataset):
         
 
         # Transform the text into tokens
-        dec_input_tokens = self.tokenizer_tgt.encode(tgt_text).ids
+        dec_input_tokens = self.tokenizer_tgt.encode(tgt_text)
 
         # # Add sos, eos and padding to each sentence
         # enc_num_padding_tokens = self.seq_len - len(enc_input_tokens) - 2  # We will add <s> and </s>

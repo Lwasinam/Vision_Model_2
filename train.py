@@ -27,6 +27,8 @@ import accelerate
 from torch.utils.tensorboard import SummaryWriter
 from safetensors.torch import load_model, save_model
 from accelerate import Accelerator
+from transformers import GPT2TokenizerFast
+import threading
 
 
 def greedy_decode(model, source, source_mask, tokenizer_tgt, max_len, device):
@@ -154,22 +156,25 @@ def tqdm_batch_iterator(data, *args, **kwargs):
         yield batch               
 
 def get_or_build_tokenizer(config, ds):
-    tokenizer_path = Path(config['tokenizer_file'])
-    if not Path.exists(tokenizer_path):
-        # Most code taken from: https://huggingface.co/docs/tokenizers/quicktour
-        tokenizer = Tokenizer(WordLevel(unk_token="[UNK]"))
-        tokenizer.pre_tokenizer = Whitespace()
-        trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[SOS]", "[EOS]"], min_frequency=2)
-        tokenizer.train_from_iterator(get_all_sentences(ds), trainer=trainer)
-        tokenizer.save(str(tokenizer_path))
-    else:
-        tokenizer = Tokenizer.from_file(str(tokenizer_path))
+    tokenizer = GPT2TokenizerFast.from_pretrained("openai-community/gpt2", unk_token ='[UNK]', bos_token = '[SOS]', eos_token = '[EOS]' , pad_token = '[PAD]')
     return tokenizer
+    # tokenizer_path = Path(config['tokenizer_file'])
+    # if not Path.exists(tokenizer_path):
+    #     # Most code taken from: https://huggingface.co/docs/tokenizers/quicktour
+    #     tokenizer = Tokenizer(WordLevel(unk_token="[UNK]"))
+    #     tokenizer.pre_tokenizer = Whitespace()
+    #     trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[SOS]", "[EOS]"], min_frequency=2)
+    #     tokenizer.train_from_iterator(get_all_sentences(ds), trainer=trainer)
+    #     tokenizer.save(str(tokenizer_path))
+    # else:
+    #     tokenizer = Tokenizer.from_file(str(tokenizer_path))
+    # return tokenizer
 
 def get_ds(config):
     # It only has the train split, so we divide it overselves
     # ds_raw = load_dataset("HausaNLP/HausaVG", split='train+validation+test+challenge_test')
-    ds_raw = load_dataset("AlFrauch/im2latex", split='train')
+    train_ds_raw =  load_dataset("laion/conceptual-captions-12m-webdataset", split='train[:90%]', streaming=True)
+    val_ds_raw =  load_dataset("laion/conceptual-captions-12m-webdataset", split='train[-1%:]', streaming=True)
     # ds_raw = load_dataset('opus_books', f"{config['lang_src']}-{config['lang_tgt']}", split='train')
 
     # Build tokenizers
@@ -177,10 +182,10 @@ def get_ds(config):
     tokenizer_tgt = get_or_build_tokenizer(config, ds_raw,)
     seed = 20  # You can choose any integer as your seed
     torch.manual_seed(seed)
-    # Keep 90% for training, 10% for validation
-    train_ds_size = int(0.9 * len(ds_raw))
-    val_ds_size = len(ds_raw) - train_ds_size
-    train_ds_raw, val_ds_raw = random_split(ds_raw, [train_ds_size, val_ds_size])
+    # # Keep 90% for training, 10% for validation
+    # train_ds_size = int(0.9 * len(ds_raw))
+    # val_ds_size = len(ds_raw) - train_ds_size
+    # train_ds_raw, val_ds_raw = random_split(ds_raw, [train_ds_size, val_ds_size])
 
     train_ds = BilingualDataset(train_ds_raw, tokenizer_tgt,  config['seq_len'])
     val_ds = BilingualDataset(val_ds_raw, tokenizer_tgt, config['seq_len'])
@@ -197,7 +202,10 @@ def get_model(config, vocab_tgt_len):
 
 def train_model(config):
 
-    accelerator = Accelerator(mixed_precision='fp16')
+    accelerator = Accelerator()
+    def save_model():
+        accelerator.save_state(output_dir=f'/kaggle/working/weights/tmodel_00')
+
 
     wandb.login(key = 'c20a1022142595d7d1324fdc53b3ccb34c0ded22')
     wandb.init(project="Vision", name=config['project_name'])
@@ -216,7 +224,7 @@ def train_model(config):
     Path(config['model_folder']).mkdir(parents=True, exist_ok=True)
 
     train_dataloader, val_dataloader, tokenizer_tgt = get_ds(config)
-    model = get_model(config, tokenizer_tgt.get_vocab_size()).to(device)
+    model = get_model(config, len(tokenizer_tgt)).to(device)
    
 
     optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'], betas=(0.9, 0.98),eps=1e-9)
@@ -228,6 +236,8 @@ def train_model(config):
     # If the user specified a model to preload before training, load it
     initial_epoch = 0
     global_step = 0
+    accelerator.register_for_checkpointing(global_step)
+
     if config['preload']:
         model_filename = get_weights_file_path(config, config['preload'])
         print(f'Preloading model {model_filename}')
@@ -240,9 +250,13 @@ def train_model(config):
         # optimizer.load_state_dict(state['optimizer_state_dict'])
         # global_step = state['global_step']
 
-    loss_fn = nn.CrossEntropyLoss(ignore_index=tokenizer_tgt.token_to_id('[PAD]'), label_smoothing=0.1).to(device)
+    loss_fn = nn.CrossEntropyLoss(ignore_index=tokenizer_tgt.convert_tokens_to_id('[PAD]'), label_smoothing=0.1).to(device)
    
     for epoch in range(initial_epoch, config['num_epochs']):
+
+        timer = threading.Timer(5*60, delayed_function)
+        timer.start()
+
         model.train()
         batch_iterator = tqdm(train_dataloader, desc=f"Processing Epoch {epoch:02d}")
         for batch in batch_iterator:
@@ -263,7 +277,7 @@ def train_model(config):
             label = batch['label'].to(device) # (B, seq_len)
 
             # Compute the loss using a simple cross entropy
-            loss = loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
+            loss = loss_fn(proj_output.view(-1, len(tokenizer_tgt)), label.view(-1))
             batch_iterator.set_postfix({"loss": f"{loss.item():6.3f}"})
 
             # Log the loss
@@ -289,6 +303,7 @@ def train_model(config):
         #     'global_step': global_step
         # }, model_filename)
         # accelerator.save_model(model, model_filename)
+    
         accelerator.save_state(output_dir=f'/kaggle/working/weights/tmodel_{epoch:02d}')
         # run_validation(model, val_dataloader, tokenizer_src, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
         model.eval()
@@ -323,7 +338,7 @@ def train_model(config):
             ))
 
                 # Compute the loss using a simple cross entropy
-                ls = loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
+                ls = loss_fn(proj_output.view(-1, len(tokenizer_tgt)), label.view(-1))
                 batch_itere.set_postfix({"loss": f"{ls.item():6.3f}"})
                 eval_loss += ls
                 # loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
