@@ -31,7 +31,9 @@ class BilingualDataset(IterableDataset):
     # def __getitem__(self):
     #     pass
     def __iter__(self):
-      
+      j = iter(self.generate())
+      print(j)
+      print(list(j))
       return iter(self.generate())
     def generate(self):
         for item in self.ds:
