@@ -30,11 +30,7 @@ class BilingualDataset(IterableDataset):
     #     return 1200000
     # def __getitem__(self):
     #     pass
-    def __iter__(self):
-      j = iter(self.generate())
-      print(j)
-      print(list(j))
-      return iter(self.generate())
+  
     def generate(self):
         for item in self.ds:
 
@@ -116,7 +112,8 @@ class BilingualDataset(IterableDataset):
                     # "src_text": src_text,
             tgt_text = tgt_text
             yield encoder_input, decoder_input, encoder_mask, decoder_mask, label, tgt_text
-                
+    def __iter__(self):
+        return iter(self.generate())           
     
 def causal_mask(size):
     mask = torch.triu(torch.ones((1, size, size)), diagonal=1).type(torch.int)

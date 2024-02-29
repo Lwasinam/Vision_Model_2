@@ -264,6 +264,7 @@ def train_model(config):
 
         model.train()
         batch_iterator = tqdm(train_dataloader, desc=f"Processing Epoch {epoch:02d}")
+        print(batch_iterator)
         for encoder_input, decoder_input, encoder_mask, decoder_mask, label, tgt_text in enumerate(batch_iterator):
            
             # run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
