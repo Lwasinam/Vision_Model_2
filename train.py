@@ -237,7 +237,8 @@ def train_model(config):
     # If the user specified a model to preload before training, load it
     initial_epoch = 0
     global_step = 0
-    def save_model():
+
+    def save_models():
         accelerator.save_state(output_dir=f'/kaggle/working/weights/tmodel_00')
         print(f'saving global step {global_step}')
     
@@ -257,7 +258,7 @@ def train_model(config):
    
     for epoch in range(initial_epoch, config['num_epochs']):
 
-        timer = threading.Timer(5*60, delayed_function)
+        timer = threading.Timer(5*60, save_models)
         timer.start()
 
         model.train()
