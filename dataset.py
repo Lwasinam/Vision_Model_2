@@ -117,7 +117,7 @@ class BilingualDataset(IterableDataset):
         worker_total_num = torch.utils.data.get_worker_info().num_workers
         worker_id = torch.utils.data.get_worker_info().id
 
-        return itertools.islice(self.genearte(), worker_id, None, worker_total_num)
+        return itertools.islice(self.generate(), worker_id, None, worker_total_num)
         # return iter(self.generate())           
     
 def causal_mask(size):
