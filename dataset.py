@@ -6,6 +6,7 @@ from io import BytesIO
 from base64 import b64decode
 from PIL import Image
 import base64
+import itertools
 
 # import model
 model_id = 'google/vit-base-patch16-224-in21k'
