@@ -113,7 +113,11 @@ class BilingualDataset(IterableDataset):
             tgt_text = tgt_text
             yield encoder_input, decoder_input, encoder_mask, decoder_mask, label
     def __iter__(self):
-        return iter(self.generate())           
+        worker_total_num = torch.utils.data.get_worker_info().num_workers
+        worker_id = torch.utils.data.get_worker_info().id
+
+        return itertools.islice(self.genearte(), worker_id, None, worker_total_num)
+        # return iter(self.generate())           
     
 def causal_mask(size):
     mask = torch.triu(torch.ones((1, size, size)), diagonal=1).type(torch.int)
