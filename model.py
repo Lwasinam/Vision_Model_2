@@ -40,10 +40,11 @@ class PatchEmbed(nn.Module):
         Convolutional layer that does both the splitting into patches
         and their embedding.
     """
-    def __init__(self, img_size, patch_size, in_chans=3, embed_dim=768, num_registers = 4):
+    def __init__(self, img_size, patch_size, in_chans=3, embed_dim=512, num_registers = 4):
         super().__init__()
         self.img_size = img_size
         self.patch_size = patch_size
+        self.norm = RMSNorm()
         self.n_patches = (img_size // patch_size) ** 2
         self.pos_embed = nn.Parameter(
                 torch.zeros(1, self.n_patches+1+num_registers, embed_dim)
@@ -84,12 +85,12 @@ class PatchEmbed(nn.Module):
         # x: (n_samples, n_patches + 1 + num_registers, embed_dimension) add register tokens
         register_tokens = self.register_token.unsqueeze(0).expand(batch_size, -1, -1) 
         x = torch.cat([x, register_tokens], dim=1)
-
+        X = self.norm(x)
         x = x + self.pos_embed  # Learnable pos embed -> (n_samples, n_patches_embed_dim) 
     
         return x
 class RMSNorm(nn.Module):
-    def __init__(self, dim: int = 768, eps: float = 1e-6):
+    def __init__(self, dim: int = 512, eps: float = 1e-6):
         super().__init__()
         self.eps = eps
         self.dim = dim
@@ -393,7 +394,7 @@ class Transformer(nn.Module):
 
 #     # # Save the blended image
 #     # blended_image.save(f"blended_attention_visualization_{str(int(round(time.time() * 1000)))}.png")
-def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=768, N: int=10, h: int=6, dropout: float=0.4, d_ff: int=2048) -> Transformer:
+def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=512, N: int=6, h: int=8, dropout: float=0.4, d_ff: int=1024) -> Transformer:
     # Create the embedding layers
   
     tgt_embed = InputEmbeddings(d_model, tgt_vocab_size)
