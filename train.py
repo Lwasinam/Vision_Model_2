@@ -173,10 +173,10 @@ def get_or_build_tokenizer(config, ds):
 def get_ds(config):
     # It only has the train split, so we divide it overselves
     # ds_raw = load_dataset("HausaNLP/HausaVG", split='train+validation+test+challenge_test')
-    train_ds_raw =  load_dataset("laion/conceptual-captions-12m-webdataset", split='train', streaming=True)
-    train_ds_raw.shuffle(20, buffer_size = 1000)
-    val_ds_raw =  load_dataset("laion/conceptual-captions-12m-webdataset", split='train', streaming=True)
-    val_ds_raw.shuffle(20, buffer_size = 1000) 
+    train_ds_raw =  load_dataset("conceptual_12m", split='train')
+    
+    val_ds_raw =  load_dataset("conceptual_12m", split='train')
+    
     # ds_raw = load_dataset('opus_books', f"{config['lang_src']}-{config['lang_tgt']}", split='train')
 
     # Build tokenizers
@@ -264,13 +264,13 @@ def train_model(config):
 
         model.train()
         batch_iterator = tqdm(train_dataloader, desc=f"Processing Epoch {epoch:02d}")
-        print(batch_iterator)
-        for encoder_input, decoder_input, encoder_mask, decoder_mask, label in batch_iterator:
+        
+        for batch in batch_iterator:
             # run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
-            encoder_input.to(device) # (b, seq_len)
-            decoder_input.to(device) # (B, seq_len)
-            encoder_mask.to(device) # (B, 1, 1, seq_len)
-            decoder_mask.to(device) # (B, 1, seq_len, seq_len)
+            encoder_input = batch["encoder_input"].to(device) # (b, seq_len)
+            decoder_input = batch["decoder_input"].to(device) # (B, seq_len)
+            encoder_mask = batch["encoder_mask"].to(device) # (B, 1, 1, seq_len)
+            decoder_mask = batch["decoder_mask"].to(device) # (B, 1, seq_len, seq_len)
 
             # Run the tensors through the encoder, decoder and the projection layer
             encoder_output = model.module.encode(encoder_input, None) # (B, seq_len, d_model)
@@ -280,7 +280,7 @@ def train_model(config):
              # (B, seq_len, vocab_size)
 
             # Compare the output with the label
-            label.to(device) # (B, seq_len)
+            label = batch["label"].to(device) # (B, seq_len)
 
             # Compute the loss using a simple cross entropy
             loss = loss_fn(proj_output.view(-1, len(tokenizer_tgt)), label.view(-1))
