@@ -53,6 +53,7 @@ class BilingualDataset(Dataset):
 
 
         src_image = fetch_single_image(src_image)
+        print(src_image)
 
             # base64_bytes = base64.b64encode(src_image)
         
