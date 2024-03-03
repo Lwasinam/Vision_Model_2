@@ -148,13 +148,12 @@ def fetch_single_image(image_url,caption, timeout=None, retries=0):
 
     return image, caption
 def generate_random_color_image(width=224, height=224):
-    """Generate an image with a random solid color (red, green, or blue)."""
-    colors = {'red':(255, 0, 0), 'green': (0, 255, 0), 'blue' : (0, 0, 255)}  # Red, Green, Blue
-    colors = {'red':(255, 0, 0), 'green': (0, 255, 0), 'blue' : (0, 0, 255)}  # Red, Green, Blue
-    color_key = random.choice(list(colors.keys()))  # Randomly select a color name
-    color = colors[color_key]
+    # """Generate an image with a random solid color (red, green, or blue)."""
+    # colors = {'red':(255, 0, 0), 'green': (0, 255, 0), 'blue' : (0, 0, 255)}  # Red, Green, Blue
+    # color_key = random.choice(list(colors.keys()))  # Randomly select a color name
+    # color = colors[color_key]
      
-    return Image.new("RGB", (width, height), color=color), f'This is a blank solid colour {color_key}'   
+    return Image.new("RGB", (width, height), color=(255, 0, 0)), f'This is a blank solid colour red'   
 
     def __iter__(self):
         worker_total_num = torch.utils.data.get_worker_info().num_workers
