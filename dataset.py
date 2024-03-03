@@ -153,8 +153,8 @@ def generate_random_color_image(width=224, height=224):
     colors = {'red':(255, 0, 0), 'green': (0, 255, 0), 'blue' : (0, 0, 255)}  # Red, Green, Blue
     color_key = random.choice(list(colors.keys()))  # Randomly select a color name
     color = colors[color_key]
-    im = Image.new("RGB", (width, height), color=color)
-    return im.convert("RGB") , f'This is a blank solid colour {color_key}'   
+     
+    return Image.new("RGB", (width, height), color=color), f'This is a blank solid colour {color_key}'   
 
     def __iter__(self):
         worker_total_num = torch.utils.data.get_worker_info().num_workers
