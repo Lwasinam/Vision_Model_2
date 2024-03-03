@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 import io
 import urllib
-
+import random
 import PIL.Image
 from datasets import load_dataset
 from datasets.utils.file_utils import get_datasets_user_agent
@@ -49,11 +49,11 @@ class BilingualDataset(Dataset):
            
         src_image = data_pair['image_url']
         tgt_text = data_pair['caption']
-        print(src_image)
+       
 
 
-        src_image = fetch_single_image(src_image)
-        print(src_image)
+        src_image = fetch_single_image(src_image, caption=tgt_text)
+        
 
             # base64_bytes = base64.b64encode(src_image)
         
@@ -132,7 +132,7 @@ class BilingualDataset(Dataset):
         }
         # yield encoder_input, decoder_input, encoder_mask, decoder_mask, label
 
-def fetch_single_image(image_url, timeout=None, retries=0):
+def fetch_single_image(image_url,caption, timeout=None, retries=0):
     for _ in range(retries + 1):
         try:
             request = urllib.request.Request(
@@ -144,8 +144,16 @@ def fetch_single_image(image_url, timeout=None, retries=0):
                 image = PIL.Image.open(io.BytesIO(req.read()))
             break
         except Exception:
-            image = None
-    return image
+            image, caption = generate_random_color_image()
+
+    return image, caption
+def generate_random_color_image(width=224, height=224):
+    """Generate an image with a random solid color (red, green, or blue)."""
+    colors = {'red':(255, 0, 0), 'green': (0, 255, 0), 'blue' : (0, 0, 255)}  # Red, Green, Blue
+    colors = {'red':(255, 0, 0), 'green': (0, 255, 0), 'blue' : (0, 0, 255)}  # Red, Green, Blue
+    color_key = random.choice(list(colors.keys()))  # Randomly select a color name
+    color = colors[color_key]
+    return Image.new("RGB", (width, height), color=color) , f'This is a blank solid colour {color_key}'   
 
     def __iter__(self):
         worker_total_num = torch.utils.data.get_worker_info().num_workers
