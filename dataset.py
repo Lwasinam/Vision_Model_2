@@ -49,6 +49,7 @@ class BilingualDataset(Dataset):
            
         src_image = data_pair['image_url']
         tgt_text = data_pair['caption']
+        print(src_image)
 
 
         src_image = fetch_single_image(src_image)
