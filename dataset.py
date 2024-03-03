@@ -61,8 +61,8 @@ class BilingualDataset(Dataset):
 
             # src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
 
-        if src_image.mode != 'RGB':
-            src_image = src_image.convert('RGB')
+        # if src_image.mode != 'RGB':
+        #     src_image = src_image.convert('RGB')
                 
         enc_input = feature_extractor(
         src_image,
