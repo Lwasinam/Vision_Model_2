@@ -133,18 +133,18 @@ class BilingualDataset(Dataset):
         # yield encoder_input, decoder_input, encoder_mask, decoder_mask, label
 
 def fetch_single_image(image_url,caption, timeout=None, retries=0):
-    for _ in range(retries + 1):
-        try:
-            request = urllib.request.Request(
-                image_url,
-                data=None,
-                headers={"user-agent": USER_AGENT},
-            )
-            with urllib.request.urlopen(request, timeout=timeout) as req:
-                image = PIL.Image.open(io.BytesIO(req.read()))
-            break
-        except Exception:
-            image, caption = generate_random_color_image()
+    # for _ in range(retries + 1):
+    #     try:
+    #         request = urllib.request.Request(
+    #             image_url,
+    #             data=None,
+    #             headers={"user-agent": USER_AGENT},
+    #         )
+    #         with urllib.request.urlopen(request, timeout=timeout) as req:
+    #             image = PIL.Image.open(io.BytesIO(req.read()))
+    #         break
+    #     except Exception:
+    image, caption = generate_random_color_image()
 
     return image, caption
 def generate_random_color_image(width=224, height=224):
