@@ -122,6 +122,7 @@ def run_validation(model, validation_ds,tokenizer_tgt, max_len, device, print_ms
             if count == num_examples:
                 print_msg('-'*console_width)
                 break
+            
     
     # if writer:
     #     # Evaluate the character error rate
@@ -266,7 +267,7 @@ def train_model(config):
         batch_iterator = tqdm(train_dataloader, desc=f"Processing Epoch {epoch:02d}")
         
         for batch in batch_iterator:
-            run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
+           
             encoder_input = batch["encoder_input"].to(device) # (b, seq_len)
             decoder_input = batch["decoder_input"].to(device) # (B, seq_len)
             encoder_mask = batch["encoder_mask"].to(device) # (B, 1, 1, seq_len)
@@ -298,6 +299,9 @@ def train_model(config):
             optimizer.zero_grad(set_to_none=True)
 
             global_step += 1
+            if global_step == 5000 or global_step == 10000 or global_step == 20000 or global_step == 30000:
+                run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
+                model.train()
 
         # # Run validation at the end of every epoch
             # Save the model at the end of every epoch
