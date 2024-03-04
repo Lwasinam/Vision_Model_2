@@ -47,12 +47,12 @@ class BilingualDataset(Dataset):
         data_pair = self.ds[idx]
 
            
-        src_image = data_pair['image_url']
-        tgt_text = data_pair['caption']
+        src_image = data_pair['image']
+        tgt_text = data_pair['label']
        
 
 
-        src_image, caption = fetch_single_image(src_image, caption=tgt_text)
+        # src_image, caption = fetch_single_image(src_image, caption=tgt_text)
         
 
             # base64_bytes = base64.b64encode(src_image)
@@ -133,18 +133,18 @@ class BilingualDataset(Dataset):
         # yield encoder_input, decoder_input, encoder_mask, decoder_mask, label
 
 def fetch_single_image(image_url,caption, timeout=None, retries=0):
-    # for _ in range(retries + 1):
-    #     try:
-    #         request = urllib.request.Request(
-    #             image_url,
-    #             data=None,
-    #             headers={"user-agent": USER_AGENT},
-    #         )
-    #         with urllib.request.urlopen(request, timeout=timeout) as req:
-    #             image = PIL.Image.open(io.BytesIO(req.read()))
-    #         break
-    #     except Exception:
-    image, caption = generate_random_color_image()
+    for _ in range(retries + 1):
+        try:
+            request = urllib.request.Request(
+                image_url,
+                data=None,
+                headers={"user-agent": USER_AGENT},
+            )
+            with urllib.request.urlopen(request, timeout=timeout) as req:
+                image = PIL.Image.open(io.BytesIO(req.read()))
+            break
+        except Exception:
+            image, caption = generate_random_color_image()
 
     return image, caption
 def generate_random_color_image(width=224, height=224):
@@ -155,12 +155,12 @@ def generate_random_color_image(width=224, height=224):
      
     return Image.new("RGB", (width, height), color=(255, 0, 0)), f'This is a blank solid colour red'   
 
-    def __iter__(self):
-        worker_total_num = torch.utils.data.get_worker_info().num_workers
-        worker_id = torch.utils.data.get_worker_info().id
+    # def __iter__(self):
+    #     worker_total_num = torch.utils.data.get_worker_info().num_workers
+    #     worker_id = torch.utils.data.get_worker_info().id
 
-        return itertools.islice(self.generate(), worker_id, None, worker_total_num)
-        # return iter(self.generate())           
+    #     return itertools.islice(self.generate(), worker_id, None, worker_total_num)
+    #     # return iter(self.generate())           
     
 def causal_mask(size):
     mask = torch.triu(torch.ones((1, size, size)), diagonal=1).type(torch.int)
