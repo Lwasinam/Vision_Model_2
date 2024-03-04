@@ -87,7 +87,7 @@ def run_validation(model, validation_ds,tokenizer_tgt, max_len, device, print_ms
         # get the console window width
         with os.popen('stty size', 'r') as console:
             _, console_width = console.read().split()
-            console_width = int(console_width)
+            console_width = int(console_width)+_
     except:
         # If we can't get the console width, use 80 as default
         console_width = 80
@@ -266,7 +266,7 @@ def train_model(config):
         batch_iterator = tqdm(train_dataloader, desc=f"Processing Epoch {epoch:02d}")
         
         for batch in batch_iterator:
-            # run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
+            run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
             encoder_input = batch["encoder_input"].to(device) # (b, seq_len)
             decoder_input = batch["decoder_input"].to(device) # (B, seq_len)
             encoder_mask = batch["encoder_mask"].to(device) # (B, 1, 1, seq_len)
