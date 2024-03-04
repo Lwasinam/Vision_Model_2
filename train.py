@@ -32,8 +32,8 @@ import threading
 
 
 def greedy_decode(model, source, source_mask, tokenizer_tgt, max_len, device):
-    sos_idx = tokenizer_tgt.token_to_id('[SOS]')
-    eos_idx = tokenizer_tgt.token_to_id('[EOS]')
+    sos_idx = tokenizer_tgt.convert_tokens_to_ids('[SOS]')
+    eos_idx = tokenizer_tgt.convert_tokens_to_ids('[EOS]')
 
     # Precompute the encoder output and reuse it for every step
     encoder_output = model.module.encode(source, None)
