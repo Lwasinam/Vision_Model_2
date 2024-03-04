@@ -173,9 +173,9 @@ def get_or_build_tokenizer(config, ds):
 def get_ds(config):
     # It only has the train split, so we divide it overselves
     # ds_raw = load_dataset("HausaNLP/HausaVG", split='train+validation+test+challenge_test')
-    train_ds_raw =  load_dataset("conceptual_12m", split='train')
+    train_ds_raw =  load_dataset("priyank-m/MJSynth_text_recognition", split='train')
     
-    val_ds_raw =  load_dataset("conceptual_12m", split='train')
+    val_ds_raw =  load_dataset("priyank-m/MJSynth_text_recognition", split='train')
     
     # ds_raw = load_dataset('opus_books', f"{config['lang_src']}-{config['lang_tgt']}", split='train')
 
