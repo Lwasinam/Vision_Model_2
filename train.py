@@ -299,7 +299,7 @@ def train_model(config):
             optimizer.zero_grad(set_to_none=True)
 
             global_step += 1
-            if global_step == 5000 or global_step == 10000 or global_step == 20000 or global_step == 30000:
+            if global_step == 1000 or global_step == 5000 or global_step == 10000 or global_step == 20000 or global_step == 30000:
                 run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
                 model.train()
 
