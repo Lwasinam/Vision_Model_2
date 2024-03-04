@@ -4,7 +4,7 @@ from torch.utils.data import IterableDataset, Dataset
 from transformers import ViTFeatureExtractor
 from io import BytesIO
 from base64 import b64decode
-from PIL import Image
+from PIL import Image,ImageFile
 import base64
 import itertools
 from concurrent.futures import ThreadPoolExecutor
@@ -29,7 +29,7 @@ class BilingualDataset(Dataset):
     def __init__(self, ds,tokenizer_tgt, seq_len):
         super().__init__()
         self.seq_len = seq_len
-
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
         self.ds = ds
         self.tokenizer_tgt = tokenizer_tgt
         # self.tgt_lang = tgt_lang
