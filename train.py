@@ -174,7 +174,7 @@ def get_or_build_tokenizer(config, ds):
 def get_ds(config):
     # It only has the train split, so we divide it overselves
     # ds_raw = load_dataset("HausaNLP/HausaVG", split='train+validation+test+challenge_test')
-    train_ds_raw =  load_dataset("priyank-m/MJSynth_text_recognition", split='train')
+    train_ds_raw =  load_dataset("priyank-m/MJSynth_text_recognition", split='train[:20%]')
     
     val_ds_raw =  load_dataset("priyank-m/MJSynth_text_recognition", split='test[:8%]')
     
@@ -302,6 +302,7 @@ def train_model(config):
             if global_step == 1000 or global_step == 5000  or global_step == 10000 or global_step == 15000 or global_step == 20000 or global_step == 30000:
                 run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
                 model.train()
+                
 
         # # Run validation at the end of every epoch
             # Save the model at the end of every epoch
