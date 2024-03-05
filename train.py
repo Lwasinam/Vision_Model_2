@@ -176,7 +176,7 @@ def get_ds(config):
     # ds_raw = load_dataset("HausaNLP/HausaVG", split='train+validation+test+challenge_test')
     train_ds_raw =  load_dataset("priyank-m/MJSynth_text_recognition", split='train')
     
-    val_ds_raw =  load_dataset("priyank-m/MJSynth_text_recognition", split='test[:10%]')
+    val_ds_raw =  load_dataset("priyank-m/MJSynth_text_recognition", split='test[:8%]')
     
     # ds_raw = load_dataset('opus_books', f"{config['lang_src']}-{config['lang_tgt']}", split='train')
 
@@ -206,7 +206,7 @@ def get_model(config, vocab_tgt_len):
 
 def train_model(config):
 
-    accelerator = Accelerator(mixed_precision='fp8')
+    accelerator = Accelerator(mixed_precision='fp16')
   
 
 
