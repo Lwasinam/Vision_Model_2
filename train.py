@@ -299,6 +299,9 @@ def train_model(config):
             optimizer.zero_grad(set_to_none=True)
 
             global_step += 1
+            if global_step == 30000 or global_step == 35000:
+                print(f'saved state at {global_step}')
+                accelerator.save_state(output_dir=f'/kaggle/working/weights/tmodel_{epoch:02d}')  
             if global_step == 1000 or global_step == 5000  or global_step == 10000 or global_step == 15000 or global_step == 20000 or global_step == 30000:
                 run_validation(model, val_dataloader, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step)
                 model.train()
