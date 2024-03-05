@@ -206,7 +206,7 @@ def get_model(config, vocab_tgt_len):
 
 def train_model(config):
 
-    accelerator = Accelerator(mixed_precision='fp16')
+    accelerator = Accelerator(mixed_precision='fp8')
   
 
 
