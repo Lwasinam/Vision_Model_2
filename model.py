@@ -23,11 +23,11 @@ class PretrainedVit():
         print(x.shape)
         print(x)
         self.model.to('cuda')
-        self.model.config.output_attentions = True
+        self.model.config.output_attentionsoutput_hidden_states = True
         outputs = self.model(x)
         # print(outputs)
-        last_hidden_states = outputs.attentions
-        return list(last_hidden_states)   
+        last_hidden_states = outputs.hidden_states
+        return list(last_hidden_states)[1:]   
 class PatchEmbed(nn.Module):
     """Split image into patches and then embed them.
 
