@@ -17,13 +17,11 @@ from transformers import ViTImageProcessor, ViTModel
 
 class PretrainedVit():
     def __init__(self):
-        self.processor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224-in21k')
+       
         self.model = ViTModel.from_pretrained('google/vit-base-patch16-224-in21k')
     def forward(self, x):
-        model.config.output_attentions = True
-        inputs = processor(images=x, return_tensors="pt")
-
-        outputs = model(**inputs)
+        self.model.config.output_attentions = True
+        outputs = model(**x)
         # print(outputs)
         last_hidden_states = outputs.attentions
         return list(last_hidden_states)   

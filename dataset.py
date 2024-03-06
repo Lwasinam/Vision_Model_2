@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import IterableDataset, Dataset
 from transformers import ViTFeatureExtractor
+from transformers import ViTImageProcessor
 from io import BytesIO
 from base64 import b64decode
 from PIL import Image,ImageFile
@@ -33,7 +34,7 @@ class BilingualDataset(Dataset):
         self.ds = ds
         self.tokenizer_tgt = tokenizer_tgt
         # self.tgt_lang = tgt_lang
-
+        self.processor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224-in21k')
         self.sos_token = torch.tensor([tokenizer_tgt.convert_tokens_to_ids("[SOS]")], dtype=torch.int64)
         self.eos_token = torch.tensor([tokenizer_tgt.convert_tokens_to_ids("[EOS]")], dtype=torch.int64)
         self.pad_token = torch.tensor([tokenizer_tgt.convert_tokens_to_ids("[PAD]")], dtype=torch.int64)
@@ -50,6 +51,7 @@ class BilingualDataset(Dataset):
         src_image = data_pair['image_base64_str']
         tgt_text = data_pair['outputs']
        
+       
 
 
         # src_image, caption = fetch_single_image(src_image, caption=tgt_text)
@@ -62,6 +64,7 @@ class BilingualDataset(Dataset):
             
 
         src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
+        src_image = self.processor(src_image, return_tensors='pt')
 
         # if src_image.mode != 'RGB':
         #     src_image = src_image.convert('RGB')
