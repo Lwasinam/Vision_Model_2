@@ -64,7 +64,7 @@ class BilingualDataset(Dataset):
             
 
         src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
-        src_image = self.processor(src_image, return_tensors='pt').unsqueeze(0)
+        src_image = self.processor(src_image, return_tensors='pt')
 
         # if src_image.mode != 'RGB':
         #     src_image = src_image.convert('RGB')
