@@ -14,6 +14,19 @@ from base64 import b64decode
 import base64
 
 ## code from @jankrepl on github
+
+class PretrainedVit():
+    def __init__(self):
+        self.processor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224-in21k')
+        self.model = ViTModel.from_pretrained('google/vit-base-patch16-224-in21k')
+    def forward(self, x):
+        model.config.output_attentions = True
+        inputs = processor(images=x, return_tensors="pt")
+
+        outputs = model(**inputs)
+        # print(outputs)
+        last_hidden_states = outputs.attentions
+        return list(last_hidden_states)   
 class PatchEmbed(nn.Module):
     """Split image into patches and then embed them.
 
@@ -108,7 +121,7 @@ class RMSNorm(nn.Module):
 
 class LayerNormalization(nn.Module):
 
-    def __init__(self, eps:float=10**-6) -> None:
+    def __init__(self, eps:float=1e-12) -> None:
         super().__init__()
         self.eps = eps
         self.alpha = nn.Parameter(torch.ones(1)) # alpha is a learnable parameter
@@ -180,7 +193,7 @@ class ResidualConnection(nn.Module):
         def __init__(self, dropout: float) -> None:
             super().__init__()
             self.dropout = nn.Dropout(dropout)
-            self.norm = RMSNorm()
+            self.norm = LayerNormalization()
     
         def forward(self, x, sublayer):
             return x + self.dropout(sublayer(self.norm(x)))
@@ -247,14 +260,15 @@ class MultiHeadAttentionBlock(nn.Module):
 
 class EncoderBlock(nn.Module):
 
-    def __init__(self, self_attention_block: MultiHeadAttentionBlock, feed_forward_block: FeedForwardBlock, dropout: float) -> None:
+    def __init__(self, self_attention_block: MultiHeadAttentionBlock, feed_forward_block: FeedForwardBlock, dropout: float,  layer: int ) -> None:
         super().__init__()
         self.self_attention_block = self_attention_block
         self.feed_forward_block = feed_forward_block
         self.residual_connections = nn.ModuleList([ResidualConnection(dropout) for _ in range(2)])
+        self.layer = layer
 
     def forward(self, x, src_mask):
-        x = self.residual_connections[0](x, lambda x: self.self_attention_block(x, x, x, src_mask))
+        x = x[self.layer]
         x = self.residual_connections[1](x, self.feed_forward_block)
         return x
     
@@ -263,7 +277,7 @@ class Encoder(nn.Module):
     def __init__(self, layers: nn.ModuleList) -> None:
         super().__init__()
         self.layers = layers
-        self.norm = RMSNorm()
+        self.norm = LayerNormalization()
 
     def forward(self, x, mask):
         for layer in self.layers:
@@ -291,7 +305,7 @@ class Decoder(nn.Module):
     def __init__(self, layers: nn.ModuleList) -> None:
         super().__init__()
         self.layers = layers
-        self.norm = RMSNorm()
+        self.norm = LayerNormalization()
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
         for layer in self.layers:
@@ -310,7 +324,7 @@ class ProjectionLayer(nn.Module):
     
 class Transformer(nn.Module):
 
-    def __init__(self, encoder: Encoder, decoder: Decoder, tgt_embed: InputEmbeddings, tgt_pos: PositionalEncoding, projection_layer: ProjectionLayer) -> None:
+    def __init__(self, encoder: Encoder, decoder: Decoder, tgt_embed: InputEmbeddings, tgt_pos: PositionalEncoding, projection_layer: ProjectionLayer, att: PretrainedVit) -> None:
         super().__init__()
         self.encoder = encoder
         self.decoder = decoder
@@ -320,12 +334,13 @@ class Transformer(nn.Module):
         self.tgt_pos = tgt_pos
         self.projection_layer = projection_layer
         self.patch_embed = PatchEmbed(img_size=224, patch_size=14)
+        self.att = att
 
     def encode(self, src, src_mask):
         # (batch, seq_len, d_model)
-        src = self.patch_embed(src)
+        attention_list = self.att.forward(x)
         # src = self.src_pos(src)
-        return self.encoder(src, src_mask)
+        return self.encoder(attention_list, src_mask)
     
     def decode(self, encoder_output: torch.Tensor, src_mask: torch.Tensor, tgt: torch.Tensor, tgt_mask: torch.Tensor):
         # (batch, seq_len, d_model)
@@ -394,7 +409,7 @@ class Transformer(nn.Module):
 
 #     # # Save the blended image
 #     # blended_image.save(f"blended_attention_visualization_{str(int(round(time.time() * 1000)))}.png")
-def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=1024, N: int=6, h: int=8, dropout: float=0.4, d_ff: int=1024) -> Transformer:
+def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=768, N: int=6, h: int=8, dropout: float=0.4, d_ff: int=1024) -> Transformer:
     # Create the embedding layers
   
     tgt_embed = InputEmbeddings(d_model, tgt_vocab_size)
@@ -402,13 +417,17 @@ def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=1024, 
     # Create the positional encoding layers
     # src_pos = PositionalEncoding(d_model, src_seq_len, dropout)
     tgt_pos = PositionalEncoding(d_model, tgt_seq_len, dropout)
+
+    #attention from pretrained vit
+    att = PretrainedVit()
+    
     
     # Create the encoder blocks
     encoder_blocks = []
     for _ in range(N):
         encoder_self_attention_block = MultiHeadAttentionBlock(d_model, h, dropout)
         feed_forward_block = FeedForwardBlock(d_model, d_ff, dropout)
-        encoder_block = EncoderBlock(encoder_self_attention_block, feed_forward_block, dropout)
+        encoder_block = EncoderBlock(encoder_self_attention_block, feed_forward_block, dropout, _)
         encoder_blocks.append(encoder_block)
 
     # Create the decoder blocks
@@ -428,7 +447,7 @@ def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=1024, 
     projection_layer = ProjectionLayer(d_model, tgt_vocab_size)
     
     # Create the transformer
-    transformer = Transformer(encoder, decoder,  tgt_embed, tgt_pos, projection_layer)
+    transformer = Transformer(encoder, decoder,  tgt_embed, tgt_pos, projection_layer, att)
     
     # Initialize the parameters
     for p in transformer.parameters():

@@ -47,29 +47,29 @@ class BilingualDataset(Dataset):
         data_pair = self.ds[idx]
 
            
-        src_image = data_pair['image']
-        tgt_text = data_pair['label']
+        src_image = data_pair['image_base64_str']
+        tgt_text = data_pair['outputs']
        
 
 
         # src_image, caption = fetch_single_image(src_image, caption=tgt_text)
         
 
-            # base64_bytes = base64.b64encode(src_image)
+        base64_bytes = base64.b64encode(src_image)
         
 
-            # src_image = base64_bytes.decode()
+        src_image = base64_bytes.decode()
             
 
-            # src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
+        src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
 
-        if src_image.mode != 'RGB':
-            src_image = src_image.convert('RGB')
+        # if src_image.mode != 'RGB':
+        #     src_image = src_image.convert('RGB')
                 
-        enc_input = feature_extractor(
-        src_image,
-        return_tensors='pt'
-        )
+        # enc_input = feature_extractor(
+        # src_image,
+        # return_tensors='pt'
+        # )
                 
 
                 # Transform the text into tokens
@@ -121,7 +121,7 @@ class BilingualDataset(Dataset):
         assert label.size(0) == self.seq_len
            
         return {     
-        'encoder_input' : enc_input['pixel_values'][0],  # (seq_len)
+        'encoder_input' : src_image,  # (seq_len)
         'decoder_input' : decoder_input,  # (seq_len)
         "encoder_mask" : (torch.cat((torch.ones(197,),torch.zeros(63),),)).unsqueeze(0).unsqueeze(0), # (1, 1, seq_len)
         "decoder_mask" : (decoder_input != self.pad_token).unsqueeze(0).int() & causal_mask(decoder_input.size(0)), # (1, seq_len) & (1, seq_len, seq_len),
