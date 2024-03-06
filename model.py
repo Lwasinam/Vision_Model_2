@@ -283,9 +283,10 @@ class Encoder(nn.Module):
         self.norm = LayerNormalization()
 
     def forward(self, x, mask):
-        # for index, layer in enumerate(self.layers):
+        for index, layer in enumerate(self.layers):
         #     print(index)
-        x = layer(x, mask, index)
+            x = layer(x, mask, index)
+            break
         return self.norm(x)
 
 class DecoderBlock(nn.Module):
