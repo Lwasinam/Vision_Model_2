@@ -176,7 +176,7 @@ def get_ds(config):
     # ds_raw = load_dataset("HausaNLP/HausaVG", split='train+validation+test+challenge_test')
     train_ds_raw = load_dataset("MMInstruction/M3IT", 'coco', split ='train')
     
-    val_ds_raw =   load_dataset("MMInstruction/M3IT", 'coco', split ='val[:20%]')
+    val_ds_raw =   load_dataset("MMInstruction/M3IT", 'coco', split ='validation[:2%]')
     
     # ds_raw = load_dataset('opus_books', f"{config['lang_src']}-{config['lang_tgt']}", split='train')
 
