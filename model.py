@@ -12,7 +12,7 @@ from transformers import ViTFeatureExtractor
 from io import BytesIO
 from base64 import b64decode
 import base64
-
+from transformers import ViTImageProcessor, ViTModel
 ## code from @jankrepl on github
 
 class PretrainedVit():
