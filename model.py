@@ -336,7 +336,7 @@ class Transformer(nn.Module):
 
     def encode(self, src, src_mask):
         # (batch, seq_len, d_model)
-        attention_list = self.att.forward(x)
+        attention_list = self.att.forward(src)
         # src = self.src_pos(src)
         return self.encoder(attention_list, src_mask)
     
