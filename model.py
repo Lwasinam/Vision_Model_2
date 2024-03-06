@@ -20,6 +20,8 @@ class PretrainedVit():
        
         self.model = ViTModel.from_pretrained('google/vit-base-patch16-224-in21k')
     def forward(self, x):
+        print(x.shape)
+        print(x)
         self.model.config.output_attentions = True
         outputs = self.model(x)
         # print(outputs)
