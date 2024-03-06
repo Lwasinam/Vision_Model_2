@@ -271,8 +271,8 @@ class EncoderBlock(nn.Module):
         # print(x.shape)
         # print(self.layer)
         print()
-        out = x[index]
-        out = self.residual_connections[1](out, self.feed_forward_block)
+        out = x[11]
+        # out = self.residual_connections[1](out, self.feed_forward_block)
         return out
     
 class Encoder(nn.Module):
@@ -283,9 +283,9 @@ class Encoder(nn.Module):
         self.norm = LayerNormalization()
 
     def forward(self, x, mask):
-        for index, layer in enumerate(self.layers):
-            print(index)
-            x = layer(x, mask, index)
+        # for index, layer in enumerate(self.layers):
+        #     print(index)
+        x = layer(x, mask, index)
         return self.norm(x)
 
 class DecoderBlock(nn.Module):
