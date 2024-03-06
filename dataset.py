@@ -55,10 +55,10 @@ class BilingualDataset(Dataset):
         # src_image, caption = fetch_single_image(src_image, caption=tgt_text)
         
 
-        base64_bytes = base64.b64encode(src_image)
+        # base64_bytes = base64.b64encode(src_image)
         
 
-        src_image = base64_bytes.decode()
+        # src_image = base64_bytes.decode()
             
 
         src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
