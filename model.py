@@ -268,7 +268,7 @@ class EncoderBlock(nn.Module):
         self.layer = layer
 
     def forward(self, x, src_mask):
-        print(x)
+        print(x.shape)
         x = x[self.layer]
         x = self.residual_connections[1](x, self.feed_forward_block)
         return x
