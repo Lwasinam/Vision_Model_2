@@ -27,7 +27,7 @@ class PretrainedVit():
         outputs = self.model(x)
         # print(outputs)
         last_hidden_states = outputs.hidden_states
-        return list(last_hidden_states)[1:]   
+        return list(last_hidden_states)
 class PatchEmbed(nn.Module):
     """Split image into patches and then embed them.
 
@@ -341,7 +341,7 @@ class Transformer(nn.Module):
         # (batch, seq_len, d_model)
         attention_list = self.att.forward(src)
         # src = self.src_pos(src)
-        return self.encoder(attention_list, src_mask)
+        return self.encoder(attention_list[1:], src_mask)
     
     def decode(self, encoder_output: torch.Tensor, src_mask: torch.Tensor, tgt: torch.Tensor, tgt_mask: torch.Tensor):
         # (batch, seq_len, d_model)
