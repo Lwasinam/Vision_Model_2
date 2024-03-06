@@ -22,6 +22,7 @@ class PretrainedVit():
     def forward(self, x):
         print(x.shape)
         print(x)
+        self.model.to('cuda')
         self.model.config.output_attentions = True
         outputs = self.model(x)
         # print(outputs)
