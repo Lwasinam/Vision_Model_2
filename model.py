@@ -20,8 +20,7 @@ class PretrainedVit():
        
         self.model = ViTModel.from_pretrained('google/vit-base-patch16-224-in21k')
     def forward(self, x):
-        print(x.shape)
-        print(x)
+        
         self.model.to('cuda')
         self.model.config.output_hidden_states = True
         outputs = self.model(x)
@@ -269,6 +268,7 @@ class EncoderBlock(nn.Module):
         self.layer = layer
 
     def forward(self, x, src_mask):
+        print(x)
         x = x[self.layer]
         x = self.residual_connections[1](x, self.feed_forward_block)
         return x
