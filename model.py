@@ -267,10 +267,10 @@ class EncoderBlock(nn.Module):
         self.residual_connections = nn.ModuleList([ResidualConnection(dropout) for _ in range(2)])
         self.layer = layer
 
-    def forward(self, x, src_mask):
+    def forward(self, x, src_mask, index):
         # print(x.shape)
         # print(self.layer)
-        x = x[layer]
+        x = x[index]
         x = self.residual_connections[1](x, self.feed_forward_block)
         return x
     
@@ -284,7 +284,7 @@ class Encoder(nn.Module):
     def forward(self, x, mask):
         for index, layer in enumerate(self.layers):
             print(index)
-            x = layer(x, mask)
+            x = layer(x, mask, index)
         return self.norm(x)
 
 class DecoderBlock(nn.Module):
