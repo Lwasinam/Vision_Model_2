@@ -23,7 +23,7 @@ class PretrainedVit():
         print(x.shape)
         print(x)
         self.model.to('cuda')
-        self.model.config.output_attentionsoutput_hidden_states = True
+        self.model.config.output_hidden_states = True
         outputs = self.model(x)
         # print(outputs)
         last_hidden_states = outputs.hidden_states
