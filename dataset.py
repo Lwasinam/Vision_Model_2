@@ -124,7 +124,7 @@ class BilingualDataset(Dataset):
         assert label.size(0) == self.seq_len
            
         return {     
-        'encoder_input' : src_image.unsqueeze(0),  # (seq_len)
+        'encoder_input' : src_image['pixel_values'].unsqueeze(0),  # (seq_len)
         'decoder_input' : decoder_input,  # (seq_len)
         "encoder_mask" : (torch.cat((torch.ones(197,),torch.zeros(63),),)).unsqueeze(0).unsqueeze(0), # (1, 1, seq_len)
         "decoder_mask" : (decoder_input != self.pad_token).unsqueeze(0).int() & causal_mask(decoder_input.size(0)), # (1, seq_len) & (1, seq_len, seq_len),

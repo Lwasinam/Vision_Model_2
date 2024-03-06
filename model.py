@@ -21,7 +21,7 @@ class PretrainedVit():
         self.model = ViTModel.from_pretrained('google/vit-base-patch16-224-in21k')
     def forward(self, x):
         self.model.config.output_attentions = True
-        outputs = self.model(**x)
+        outputs = self.model(x)
         # print(outputs)
         last_hidden_states = outputs.attentions
         return list(last_hidden_states)   
