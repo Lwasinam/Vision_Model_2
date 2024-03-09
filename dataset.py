@@ -66,12 +66,14 @@ class BilingualDataset(Dataset):
         src_image  = Image.open(BytesIO(b64decode(''.join(src_image))))
         src_image = self.processor(src_image, return_tensors='pt')
 
-        if src_image.ndim == 2:
-    # Convert to 3D by adding a channel dimension and replicating it 3 times for RGB
-            src_image = src_image.unsqueeze(0).expand(3, -1, -1)
+        if src_image.mode != 'RGB':
+             src_image = src_image.convert('RGB')
 
-        # if src_image.mode != 'RGB':
-        #     src_image = src_image.convert('RGB')
+    #     if src_image.ndim == 2:
+    # # Convert to 3D by adding a channel dimension and replicating it 3 times for RGB
+    #         src_image = src_image.unsqueeze(0).expand(3, -1, -1)
+
+       
                 
         # enc_input = feature_extractor(
         # src_image,
