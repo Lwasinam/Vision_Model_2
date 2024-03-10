@@ -210,7 +210,7 @@ def train_model(config):
     accelerator = Accelerator()
   
 
-
+    print()
     wandb.login(key = 'c20a1022142595d7d1324fdc53b3ccb34c0ded22')
     wandb.init(project="Vision", name=config['project_name'])
 
