@@ -270,7 +270,7 @@ class EncoderBlock(nn.Module):
     def forward(self, x, src_mask, index):
         # print(x.shape)
         # print(self.layer)
-        print()
+        
         out = x[11]
         # out = self.residual_connections[1](out, self.feed_forward_block)
         return out
@@ -430,7 +430,7 @@ def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=768, N
     # Create the encoder blocks
     encoder_blocks = []
     for _ in range(N):
-        print(f'creating encoder{_}')
+        print()
         encoder_self_attention_block = MultiHeadAttentionBlock(d_model, h, dropout)
         feed_forward_block = FeedForwardBlock(d_model, d_ff, dropout)
         encoder_block = EncoderBlock(encoder_self_attention_block, feed_forward_block, dropout, _)
