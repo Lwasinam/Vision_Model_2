@@ -414,7 +414,7 @@ class Transformer(nn.Module):
 
 #     # # Save the blended image
 #     # blended_image.save(f"blended_attention_visualization_{str(int(round(time.time() * 1000)))}.png")
-def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=768, N: int=10, h: int=10, dropout: float=0.1, d_ff: int=3072) -> Transformer:
+def build_transformer(tgt_vocab_size: int, tgt_seq_len: int, d_model: int=768, N: int=10, h: int=12, dropout: float=0.1, d_ff: int=3072) -> Transformer:
     # Create the embedding layers
   
     tgt_embed = InputEmbeddings(d_model, tgt_vocab_size)
